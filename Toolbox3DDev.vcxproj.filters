@@ -27,6 +27,9 @@
     <ClCompile Include="toolbox\src\quaternion.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="toolbox\src\utility.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="toolbox\include\matrix.h">

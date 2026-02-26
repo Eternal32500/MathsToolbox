@@ -405,7 +405,7 @@ Matrix3x3 Matrix3x3::MultiplyScalar(float f) const
 
 Matrix3x3 Matrix3x3::MultiplyMatrix(const Matrix3x3& mat) const
 {
-    float _m[9];
+    float _m[9]{};
 
     _m[0] = m[0] * mat.m[0] + m[1] * mat.m[3] + m[2] * mat.m[6];
     _m[1] = m[0] * mat.m[1] + m[1] * mat.m[4] + m[2] * mat.m[7];
