@@ -13,24 +13,32 @@ namespace Core
 		class Matrix2x2
 		{
 		public:
-			float m[4];
+			float m[4] = { 
+				0.0f, 0.0f, 
+				0.0f, 0.0f 
+			};
 
-			static Matrix2x2 Identity();
+			static const Matrix2x2 Identity;
+			static const Matrix2x2 Zero;
 
+			Matrix2x2();
 			Matrix2x2(float _m[4]);
-			~Matrix2x2() = default;
+			Matrix2x2(std::vector<float> vertex);
+			Matrix2x2(const Vector2D& v1, const Vector2D& v2);
+			Matrix2x2(float n1, float n2, float n3, float n4);
+			Matrix2x2(float components);
 
-			Vector2D Diagonal() const;
 			float Trace() const;
+			float Determinant() const;
+			Vector2D Diagonal() const;
 			Matrix2x2 Opposite() const;
-			Matrix2x2 Transpose() const;
+			Matrix2x2 Transposite() const;
 			Matrix2x2 AddMatrix(const Matrix2x2& mat) const;
 			Matrix2x2 AddMatrix(const MatrixND& mat) const;
 			Matrix2x2 MultiplyScalar(float f) const;
 			Matrix2x2 MultiplyMatrix(const Matrix2x2& mat) const;
 			MatrixND MultiplyMatrix(const MatrixND& mat) const;
-			Vector2D MultriplyVector2D(Vector2D& vec) const;
-			float Determinant() const;
+			Vector2D MultriplyVector2D(const Vector2D& vec) const;
 			MatrixND ExpandRight(const Matrix2x2& mat) const;
 			MatrixND ExpandRight(const MatrixND& mat) const;
 			Matrix2x2 Pivot() const;
@@ -42,6 +50,35 @@ namespace Core
 			void Print() const;
 
 			Vector2D operator*(Vector2D& v);
+
+			bool operator==(const Matrix2x2&);
+			float operator[](int);
+
+			Matrix2x2 operator+(const Matrix2x2&);
+			Matrix2x2 operator+(const MatrixND&);
+			Matrix2x2 operator+(float);
+			void operator+=(const Matrix2x2&);
+			void operator+=(const MatrixND&);
+			void operator+=(float);
+
+			Matrix2x2 operator-(const Matrix2x2&);
+			Matrix2x2 operator-(const MatrixND&);
+			Matrix2x2 operator-(float);
+			void operator-=(const Matrix2x2&);
+			void operator-=(const MatrixND&);
+			void operator-=(float);
+
+			Matrix2x2 operator*(const Matrix2x2&);
+			MatrixND operator*(const MatrixND&);
+			Vector2D operator*(const Vector2D&);
+			Matrix2x2 operator*(float);
+			void operator*=(const Matrix2x2&);
+			void operator*=(float);
+
+			Matrix2x2 operator/(float);
+			Matrix2x2 operator/(const Matrix2x2&);
+			void operator/=(float);
+			void operator/=(const Matrix2x2&);
 
 		private:
 			void RoundMatrix();

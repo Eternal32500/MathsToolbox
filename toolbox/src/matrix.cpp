@@ -4,6 +4,19 @@
 
 using namespace Core::Maths;
 #pragma region Matrix2x2
+
+const Matrix2x2 Matrix2x2::Identity = Matrix2x2(1.0f, 0.0f, 1.0f, 0.0f);
+const Matrix2x2 Matrix2x2::Zero = Matrix2x2(0.0f, 0.0f, 0.0f, 0.0f);
+
+Matrix2x2::Matrix2x2()
+{
+    m[0] = 0.0f;
+    m[1] = 0.0f;
+    m[2] = 0.0f;
+    m[3] = 0.0f;
+
+    RoundMatrix();
+}
 Matrix2x2::Matrix2x2(float _m[4])
 {
     m[0] = _m[0];
@@ -12,8 +25,46 @@ Matrix2x2::Matrix2x2(float _m[4])
     m[3] = _m[3];
 
     RoundMatrix();
+}
 
-    *this = Transpose();
+Matrix2x2::Matrix2x2(std::vector<float> vertex)
+{
+    m[0] = vertex[0];
+    m[1] = vertex[1];
+    m[2] = vertex[2];
+    m[3] = vertex[3];
+
+    RoundMatrix();
+}
+
+Matrix2x2::Matrix2x2(const Vector2D& v1, const Vector2D& v2)
+{
+    m[0] = v1[0];
+    m[1] = v1[1];
+    m[2] = v2[0];
+    m[3] = v2[1];
+
+    RoundMatrix();
+}
+
+Matrix2x2::Matrix2x2(float n1, float n2, float n3, float n4)
+{
+    m[0] = n1;
+    m[1] = n2;
+    m[2] = n3;
+    m[3] = n4;
+
+    RoundMatrix();
+}
+
+Matrix2x2::Matrix2x2(float components)
+{
+    m[0] = components;
+    m[1] = components;
+    m[2] = components;
+    m[3] = components;
+
+    RoundMatrix();
 }
 
 Vector2D Matrix2x2::Diagonal() const
@@ -28,68 +79,55 @@ float Matrix2x2::Trace() const
 
 Matrix2x2 Matrix2x2::Opposite() const
 {
-    float _m[4] = { 
+    return {
         -m[0], -m[1],
         -m[2], -m[3]
     };
-
-    return Matrix2x2(_m);
 }
 
-Matrix2x2 Matrix2x2::Transpose() const
+Matrix2x2 Matrix2x2::Transposite() const
 {
-    float _m[4] = {
+    return {
         m[0], m[2],
         m[1], m[3]
     };
-
-    return Matrix2x2(_m);
 }
 
 Matrix2x2 Matrix2x2::AddMatrix(const Matrix2x2& mat) const
 {
-    float _m[4] = {
+    return {
         m[0] + mat.m[0], m[1] + mat.m[1],
         m[2] + mat.m[2], m[3] + mat.m[3]
     };
-
-    return Matrix2x2(_m);
 }
 
 Matrix2x2 Matrix2x2::AddMatrix(const MatrixND& mat) const
 {
     if (mat.lines != 2 || mat.columns != 2)
-        return *this;
+        return Matrix2x2::Zero;
 
-    float _m[4] = {
+    return {
         m[0] + mat.m[0], m[1] + mat.m[1],
         m[2] + mat.m[2], m[3] + mat.m[3]
     };
-
-    return Matrix2x2(_m);
 }
 
 Matrix2x2 Matrix2x2::MultiplyScalar(float f) const
 {
-    float _m[4] = {
+    return {
         m[0] * f, m[1] * f,
         m[2] * f, m[3] * f
     };
-
-    return Matrix2x2(_m);
 }
 
 Matrix2x2 Matrix2x2::MultiplyMatrix(const Matrix2x2& mat) const
 {
-    float _m[4];
-
-    _m[0] = m[0] * mat.m[0] + m[1] * mat.m[2];
-    _m[1] = m[0] * mat.m[1] + m[1] * mat.m[3];
-
-    _m[2] = m[2] * mat.m[0] + m[3] * mat.m[2];
-    _m[3] = m[2] * mat.m[1] + m[3] * mat.m[3];
-
-    return Matrix2x2(_m);
+    return {
+         m[0] * mat.m[0] + m[1] * mat.m[2],
+         m[0] * mat.m[1] + m[1] * mat.m[3],
+         m[2] * mat.m[0] + m[3] * mat.m[2],
+         m[2] * mat.m[1] + m[3] * mat.m[3]
+    }; 
 }
 
 MatrixND Matrix2x2::MultiplyMatrix(const MatrixND& mat) const
@@ -113,13 +151,12 @@ MatrixND Matrix2x2::MultiplyMatrix(const MatrixND& mat) const
     return MatrixND(2, mat.columns, _m);
 }
 
-Vector2D Matrix2x2::MultriplyVector2D(Vector2D& vec) const
+Vector2D Matrix2x2::MultriplyVector2D(const Vector2D& vec) const
 {
-    float _m[2] = { 0.f, 0.f };
-    _m[0] = m[0] * vec.x + m[1] * vec.y;
-    _m[1] = m[2] * vec.x + m[3] * vec.y;
-
-    return Vector2D(_m[0], _m[1]);
+    return {
+        m[0] * vec.x + m[1] * vec.y,
+        m[2] * vec.x + m[3] * vec.y
+    };
 }
 
 float Matrix2x2::Determinant() const
@@ -154,15 +191,6 @@ MatrixND Matrix2x2::ExpandRight(const MatrixND& mat) const
     }
 
     return MatrixND(2, 2 + mat.columns, _m);
-}
-
-Matrix2x2 Matrix2x2::Identity()
-{
-    float _m[4] = {
-        1.f, 0.f,
-        0.f, 1.f
-    };
-    return Matrix2x2(_m);
 }
 
 Matrix2x2 Matrix2x2::Pivot() const
@@ -212,54 +240,45 @@ Matrix2x2 Matrix2x2::Pivot() const
 Matrix2x2 Matrix2x2::Inverse() const
 {
     if (IsEqualZero(Determinant()))
-        return *this;
+        return Matrix2x2::Zero;
 
-    MatrixND mat(2, 4, ExpandRight(Identity()).m);
+    MatrixND mat(2, 4, ExpandRight(Matrix2x2::Identity).m);
     mat = mat.Pivot();
 
-    float _m[4] = {
+    return {
         mat.m[2], mat.m[3],
         mat.m[6], mat.m[7]
-    };
-
-    return Matrix2x2(_m);
+    };;
 }
 
 Matrix3x3 Matrix2x2::Translate(Vector3D p)
 {
-    float _m[9] = {
+    return {
         1.f, 0.f, p.x,
         0.f, 1.f, p.y,
         0.f, 0.f, 1.f
     };
-
-    return Matrix3x3(_m);
 }
 
 Matrix2x2 Matrix2x2::Rotate2DOrigin(float angle) const
 {
-    angle *= PI / 180.f;
+   
 
-    float _m[4] = {
+    return {
         std::cosf(angle), -std::sinf(angle),
         std::sin(angle),   std::cos(angle)
     };
-
-    return Matrix2x2(_m);
 }
 
 Matrix3x3 Matrix2x2::Rotate2DPoint(float angle, Vector2D p)
 {
-    using namespace std;
-    angle *= PI / 180.f;
+    angle = TO_RADIANS(angle);
 
-    float _m[9] = {
-        cosf(angle), -sinf(angle), p.x * (1 - cosf(angle)) + p.y * sinf(angle),
-        sin(angle),   cos(angle),  p.y * (1 - cosf(angle)) - p.x * sinf(angle),
+    return {
+        std::cosf(angle), -std::sinf(angle), p.x * (1 - std::cosf(angle)) + p.y * std::sinf(angle),
+        std::sin(angle),   std::cos(angle),  p.y * (1 - std::cosf(angle)) - p.x * std::sinf(angle),
              0.f,               0.f,                             1.f
-    };
-
-    return Matrix3x3(_m);
+    };;
 }
 
 void Matrix2x2::Print() const
@@ -271,6 +290,223 @@ void Matrix2x2::Print() const
 Vector2D Matrix2x2::operator*(Vector2D& v)
 {
     return MultriplyVector2D(v);
+}
+
+bool  Matrix2x2::operator==(const Matrix2x2& mPrime)
+{
+    return IsEqual(m[0], mPrime.m[0]) && 
+           IsEqual(m[1], mPrime.m[1]) && 
+           IsEqual(m[2], mPrime.m[2]) && 
+           IsEqual(m[3], mPrime.m[3]);
+}
+
+float Matrix2x2::operator[](int index)
+{
+    switch (index)
+    {
+    case 0:
+        return m[0];
+        break;
+    case 1:
+        return m[1];
+        break;
+    case 2:
+        return m[2];
+        break;
+    default:
+        return m[3];
+        break;
+    }
+}
+
+Matrix2x2 Matrix2x2::operator+(const Matrix2x2& mPrime)
+{
+    return AddMatrix(mPrime);
+}
+
+Matrix2x2 Matrix2x2::operator+(const MatrixND& mPrime)
+{
+    return AddMatrix(mPrime);
+}
+
+Matrix2x2 Matrix2x2::operator+(float x)
+{
+    return {
+         m[0] + x, m[1] + x,
+         m[2] + x, m[3] + x
+    };
+}
+
+void Matrix2x2::operator+=(const Matrix2x2& mPrime)
+{
+    m[0] += mPrime.m[0];
+    m[1] += mPrime.m[1];
+    m[2] += mPrime.m[2];
+    m[3] += mPrime.m[3];
+}
+
+void Matrix2x2::operator+=(const MatrixND& mPrime)
+{
+    if (mPrime.lines != 2 || mPrime.columns != 2)
+        return;
+
+    m[0] += mPrime.m[0];
+    m[1] += mPrime.m[1];
+    m[2] += mPrime.m[2];
+    m[3] += mPrime.m[3];
+}
+
+void Matrix2x2::operator+=(float x)
+{
+    m[0] += x;
+    m[1] += x;
+    m[2] += x;
+    m[3] += x;
+}
+
+Matrix2x2 Matrix2x2::operator-(const Matrix2x2& mPrime)
+{
+    return {
+        m[0] - mPrime.m[0], m[1] - mPrime.m[1],
+        m[2] - mPrime.m[2], m[3] - mPrime.m[3]
+    };
+}
+
+Matrix2x2 Matrix2x2::operator-(const MatrixND& mat)
+{
+    if (mat.lines != 2 || mat.columns != 2)
+        return Matrix2x2::Zero;
+
+    return {
+        m[0] - mat.m[0], m[1] - mat.m[1],
+        m[2] - mat.m[2], m[3] - mat.m[3]
+    };
+}
+
+Matrix2x2 Matrix2x2::operator-(float x)
+{
+    return {
+        m[0] - x, m[1] - x,
+        m[2] - x, m[3] - x
+    };
+}
+
+void Matrix2x2::operator-=(const Matrix2x2& mPrime)
+{
+    m[0] -= mPrime.m[0];
+    m[1] -= mPrime.m[1];
+    m[2] -= mPrime.m[2];
+    m[3] -= mPrime.m[3];
+}
+
+void Matrix2x2::operator-=(const MatrixND& mPrime)
+{
+    if (mPrime.lines != 2 || mPrime.columns != 2)
+        return;
+
+    m[0] -= mPrime.m[0];
+    m[1] -= mPrime.m[1];
+    m[2] -= mPrime.m[2];
+    m[3] -= mPrime.m[3];
+}
+
+void Matrix2x2::operator-=(float x)
+{
+    m[0] -= x;
+    m[1] -= x;
+    m[2] -= x;
+    m[3] -= x;
+}
+
+Matrix2x2 Matrix2x2::operator*(const Matrix2x2& mPrime)
+{
+    return MultiplyMatrix(mPrime);
+}
+
+MatrixND Matrix2x2::operator*(const MatrixND& mPrime)
+{
+    return MultiplyMatrix(mPrime);
+}
+
+Vector2D Matrix2x2::operator*(const Vector2D& v)
+{
+    return MultriplyVector2D(v);
+}
+
+Matrix2x2 Matrix2x2::operator*(float x)
+{
+    return MultiplyScalar(x);
+}
+
+void Matrix2x2::operator*=(const Matrix2x2& mPrime)
+{
+    m[0] *= mPrime.m[0];
+    m[1] *= mPrime.m[1];
+    m[2] *= mPrime.m[2];
+    m[3] *= mPrime.m[3];
+}
+
+void Matrix2x2::operator*=(float x)
+{
+    m[0] *= x;
+    m[1] *= x;
+    m[2] *= x;
+    m[3] *= x;
+}
+
+Matrix2x2 Matrix2x2::operator/(float x)
+{
+    if (IsEqualZero(x))
+        return Matrix2x2::Zero;
+
+    return {
+        m[0] / x, m[1] / x,
+        m[2] / x, m[3] / x
+    };
+}
+
+void Matrix2x2::operator/=(float x)
+{
+    if (IsEqualZero(x))
+        return;
+
+    m[0] /= x; 
+    m[1] /= x;
+    m[2] /= x; 
+    m[3] /= x;
+}
+
+void Matrix2x2::operator/=(const Matrix2x2& mPrime)
+{
+    if (IsEqualZero(mPrime.m[0]) || IsEqualZero(mPrime.m[1]) || IsEqualZero(mPrime.m[2]) || IsEqualZero(mPrime.m[3]))
+        return;
+
+    m[0] /= mPrime.m[0];
+    m[1] /= mPrime.m[1];
+    m[2] /= mPrime.m[2];
+    m[3] /= mPrime.m[3];
+}
+
+Matrix2x2 Matrix2x2::operator/(float x)
+{
+    if (IsEqualZero(x))
+        return Matrix2x2::Zero;
+
+    return {
+        m[0] / x, m[1] / x,
+        m[2] / x, m[3] / x
+    };
+}
+
+Matrix2x2 Matrix2x2::operator/(const Matrix2x2& mPrime)
+{
+    if (IsEqualZero(mPrime.m[0]) || IsEqualZero(mPrime.m[1]) || IsEqualZero(mPrime.m[2]) || IsEqualZero(mPrime.m[3]))
+        return Matrix2x2::Zero;
+
+    return {
+        m[0] / mPrime.m[0], m[1] / mPrime.m[1],
+        m[2] / mPrime.m[2], m[3] / mPrime.m[3]
+    };
 }
 
 void Matrix2x2::RoundMatrix()
