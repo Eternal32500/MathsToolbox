@@ -175,26 +175,32 @@ namespace Core
 		class Matrix4x4
 		{
 		public:
+			static const Matrix4x4 Identity;
+			static const Matrix4x4 Zero;
+
 			float m[16];
 
-			static Matrix4x4 Identity();
-
 			Matrix4x4();
-			Matrix4x4(Matrix3x3 mat);
-			Matrix4x4(float _m[16]);
-			Matrix4x4(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float);
-			~Matrix4x4() = default;
+			Matrix4x4(std::vector<float> vertex);
+			Matrix4x4(float array[16]);
+			Matrix4x4(const Vector4D& v1, const Vector4D& v2, const Vector4D& v3, const Vector4D& v4);
+			Matrix4x4(float n1, float n2, float n3, float n4,
+				float n5, float n6, float n7, float n8,
+				float n9, float n10, float n11, float n12,
+				float n13, float n14, float n15, float n16);
+			Matrix4x4(float components);
+			Matrix4x4(const Matrix3x3&);
 
 			Vector4D Diagonal() const;
 			float Trace() const;
 			Matrix4x4 Opposite() const;
-			Matrix4x4 Transpose() const;
+			Matrix4x4 Transposite() const;
 			Matrix4x4 AddMatrix(const Matrix4x4& mat) const;
 			Matrix4x4 AddMatrix(const MatrixND& mat) const;
 			Matrix4x4 MultiplyScalar(float f) const;
 			Matrix4x4 MultiplyMatrix(const Matrix4x4& mat) const;
 			MatrixND MultiplyMatrix(const MatrixND& mat) const;
-			Vector4D MultriplyVector4D(Vector4D& vec) const;
+			Vector4D MultiplyVector4D(const Vector4D& vec) const;
 			float Determinant() const;
 			MatrixND ExpandRight(const Matrix4x4& mat) const;
 			MatrixND ExpandRight(const MatrixND& mat) const;
@@ -215,10 +221,35 @@ namespace Core
 
 			void Print() const;
 
-			bool operator==(const Matrix4x4& other);
+			bool operator==(const Matrix4x4&);
+			float operator[](int);
 
+			Matrix4x4 operator+(const Matrix4x4&);
+			Matrix4x4 operator+(const MatrixND&);
+			Matrix4x4 operator+(float);
+			void operator+=(const Matrix4x4&);
+			void operator+=(const MatrixND&);
+			void operator+=(float);
+
+			Matrix4x4 operator-(const Matrix4x4&);
+			Matrix4x4 operator-(const MatrixND&);
+			Matrix4x4 operator-(float);
+			void operator-=(const Matrix4x4&);
+			void operator-=(const MatrixND&);
+			void operator-=(float);
+
+			Matrix4x4 operator*(const Matrix4x4&);
+			MatrixND operator*(const MatrixND&);
+			Vector4D operator*(const Vector4D&);
 			Vector4D operator*(Vector4D& v);
-			Matrix4x4 operator*(const Matrix4x4& v);
+			Matrix4x4 operator*(float);
+			void operator*=(const Matrix4x4&);
+			void operator*=(float);
+
+			Matrix4x4 operator/(float);
+			Matrix4x4 operator/(const Matrix4x4&);
+			void operator/=(float);
+			void operator/=(const Matrix4x4&);
 
 		private:
 			void RoundMatrix();

@@ -1273,6 +1273,21 @@ bool Matrix3x3::NearZero(float num) const
 #pragma endregion
 
 #pragma region Matrix4x4
+
+const Matrix4x4 Matrix4x4::Identity = {
+    1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f,
+};
+
+const Matrix4x4 Matrix4x4::Zero = {
+    0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,
+};
+
 Matrix4x4::Matrix4x4(float _m[16])
 {
     m[0] = _m[0];
@@ -1291,6 +1306,30 @@ Matrix4x4::Matrix4x4(float _m[16])
     m[13] = _m[13];
     m[14] = _m[14];
     m[15] = _m[15];
+
+    RoundMatrix();
+}
+
+Matrix4x4::Matrix4x4(const Vector4D& v1, const Vector4D& v2, const Vector4D& v3, const Vector4D& v4)
+{
+    m[0] =  v1[0];
+    m[1] =  v1[1];
+    m[2] =  v1[2];
+    m[3] =  v1[3];
+    m[4] =  v2[0];
+    m[5] =  v2[1];
+    m[6] =  v2[2];
+    m[7] =  v2[3];
+    m[8] =  v3[0];
+    m[9] =  v3[1];
+    m[10] = v3[2];
+    m[11] = v3[3];
+    m[12] = v4[0];
+    m[13] = v4[1];
+    m[14] = v4[2];
+    m[15] = v4[3];
+
+    RoundMatrix();
 }
 
 Matrix4x4::Matrix4x4(float n1, float n2, float n3, float n4, float n5, float n6, float n7, float n8, float n9, float n10, float n11, float n12, float n13, float n14, float n15, float n16)
@@ -1311,6 +1350,30 @@ Matrix4x4::Matrix4x4(float n1, float n2, float n3, float n4, float n5, float n6,
     m[13] = n14;
     m[14] = n15;
     m[15] = n16;
+
+    RoundMatrix();
+}
+
+Matrix4x4::Matrix4x4(float components)
+{
+    m[0] = components;
+    m[1] = components;
+    m[2] = components;
+    m[3] = components;
+    m[4] = components;
+    m[5] = components;
+    m[6] = components;
+    m[7] = components;
+    m[8] = components;
+    m[9] = components;
+    m[10] = components;
+    m[11] = components;
+    m[12] = components;
+    m[13] = components;
+    m[14] = components;
+    m[15] = components;
+
+    RoundMatrix();
 }
 
 Matrix4x4::Matrix4x4()
@@ -1331,9 +1394,33 @@ Matrix4x4::Matrix4x4()
     m[13] = 0.f; 
     m[14] = 0.f; 
     m[15] = 0.f;
+
+    RoundMatrix();
 }
 
-Core::Maths::Matrix4x4::Matrix4x4(Matrix3x3 mat)
+Matrix4x4::Matrix4x4(std::vector<float> vertex)
+{
+    m[0] = vertex[0];
+    m[1] = vertex[1];
+    m[2] = vertex[2];
+    m[3] = vertex[3];
+    m[4] = vertex[4];
+    m[5] = vertex[5];
+    m[6] = vertex[6];
+    m[7] = vertex[7];
+    m[8] = vertex[8];
+    m[9] = vertex[9];
+    m[10] = vertex[10];
+    m[11] = vertex[11];
+    m[12] = vertex[12];
+    m[13] = vertex[13];
+    m[14] = vertex[14];
+    m[15] = vertex[15];
+
+    RoundMatrix();
+}
+
+Matrix4x4::Matrix4x4(const Matrix3x3& mat)
 {
 	m[0] = mat.m[0]; m[1] = mat.m[1]; m[2] = mat.m[2]; m[3] = 0.f;
 	m[4] = mat.m[3]; m[5] = mat.m[4]; m[6] = mat.m[5]; m[7] = 0.f;
@@ -1353,71 +1440,60 @@ float Matrix4x4::Trace() const
 
 Matrix4x4 Matrix4x4::Opposite() const
 {
-    float _m[16] = {
+    return {
         -m[0],  -m[1],  -m[2],  -m[3],
         -m[4],  -m[5],  -m[6],  -m[7],
         -m[8],  -m[9],  -m[10], -m[11],
         -m[12], -m[13], -m[14], -m[15]
     };
-
-    return Matrix4x4(_m);
 }
 
-Matrix4x4 Matrix4x4::Transpose() const
+Matrix4x4 Matrix4x4::Transposite() const
 {
-    float _m[16] = {
+    return {
         m[0], m[4], m[8],  m[12],
         m[1], m[5], m[9],  m[13],
         m[2], m[6], m[10], m[14],
         m[3], m[7], m[11], m[15]
     };
-
-    return Matrix4x4(_m);
 }
 
 Matrix4x4 Matrix4x4::AddMatrix(const Matrix4x4& mat) const
 {
-    float _m[16] = {
+    return {
         m[0] + mat.m[0],   m[1] + mat.m[1],   m[2] + mat.m[2],  m[3] + mat.m[3],
         m[4] + mat.m[4],   m[5] + mat.m[5],   m[6] + mat.m[6],  m[7] + mat.m[7],
         m[8] + mat.m[8],   m[9] + mat.m[9],   m[10] + mat.m[10], m[11] + mat.m[11],
         m[12] + mat.m[12], m[13] + mat.m[13], m[14] + mat.m[14], m[15] + mat.m[15]
     };
-
-    return Matrix4x4(mat);
 }
 
 Matrix4x4 Matrix4x4::AddMatrix(const MatrixND& mat) const
 {
     if (mat.lines != 4 || mat.columns != 4)
-        return *this;
+        return Matrix4x4::Zero;
 
-    float _m[16] = {
+    return {
         m[0] + mat.m[0],   m[1] + mat.m[1],   m[2] + mat.m[2],  m[3] + mat.m[3],
         m[4] + mat.m[4],   m[5] + mat.m[5],   m[6] + mat.m[6],  m[7] + mat.m[7],
         m[8] + mat.m[8],   m[9] + mat.m[9],   m[10] + mat.m[10], m[11] + mat.m[11],
         m[12] + mat.m[12], m[13] + mat.m[13], m[14] + mat.m[14], m[15] + mat.m[15]
     };
-
-    return Matrix4x4(_m);
 }
 
 Matrix4x4 Matrix4x4::MultiplyScalar(float f) const
 {
-    float _m[16] = {
+    return {
         m[0] * f,  m[1] * f,  m[2] * f,  m[3] * f,
         m[4] * f,  m[5] * f,  m[6] * f,  m[7] * f,
         m[8] * f,  m[9] * f,  m[10] * f, m[11] * f,
         m[12] * f, m[13] * f, m[14] * f, m[15] * f
     };
-
-    return Matrix4x4(_m);
 }
 
 Matrix4x4 Matrix4x4::MultiplyMatrix(const Matrix4x4& array) const
 {
-    float _m[16]
-    {
+    return {
         array.m[0] * m[0] + array.m[1] * m[4] + array.m[2] * m[8] + array.m[3] * m[12],
         array.m[0] * m[1] + array.m[1] * m[5] + array.m[2] * m[9] + array.m[3] * m[13],
         array.m[0] * m[2] + array.m[1] * m[6] + array.m[2] * m[10] + array.m[3] * m[14],
@@ -1438,8 +1514,6 @@ Matrix4x4 Matrix4x4::MultiplyMatrix(const Matrix4x4& array) const
         array.m[12] * m[2] + array.m[13] * m[6] + array.m[14] * m[10] + array.m[15] * m[14],
         array.m[12] * m[3] + array.m[13] * m[7] + array.m[14] * m[11] + array.m[15] * m[15]
     };
-
-    return Matrix4x4(_m);
 }
 
 MatrixND Matrix4x4::MultiplyMatrix(const MatrixND& mat) const
@@ -1462,7 +1536,7 @@ MatrixND Matrix4x4::MultiplyMatrix(const MatrixND& mat) const
     return MatrixND(4, mat.columns, _m);
 }
 
-Vector4D Matrix4x4::MultriplyVector4D(Vector4D& vec) const
+Vector4D Matrix4x4::MultiplyVector4D(const Vector4D& vec) const
 {
     float _m[4] = {
         0.f, 0.f, 0.f, 0.f
@@ -1536,18 +1610,6 @@ MatrixND Matrix4x4::ExpandRight(const MatrixND& mat) const
     return MatrixND(4, 4 + mat.columns, _m);
 }
 
-Matrix4x4 Matrix4x4::Identity()
-{
-    float _m[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
- 
-     return Matrix4x4(_m);
-}
-
 Matrix4x4 Matrix4x4::Pivot() const
 {
     float _m[16] = {
@@ -1599,41 +1661,37 @@ Matrix4x4 Matrix4x4::Inverse() const
     if (IsEqualZero(Determinant()))
         return *this;
 
-    MatrixND mat(4, 8, ExpandRight(Identity()).m);
+    MatrixND mat(4, 8, ExpandRight(Identity).m);
     mat = mat.Pivot();
 
-    float _m[16] = {
+    return {
         mat.m[4],  mat.m[5],  mat.m[6],  mat.m[7],
         mat.m[12], mat.m[13], mat.m[14], mat.m[15],
         mat.m[20], mat.m[21], mat.m[22], mat.m[23],
         mat.m[28], mat.m[29], mat.m[30], mat.m[31]
     };
-
-    return Matrix4x4(_m);
 }
 
 Matrix4x4 Matrix4x4::Translate(Vector3D p) const
 {
-    float _m[16] = {
+    return {
         1.f, 0.f, 0.f, p.x,
         0.f, 1.f, 0.f, p.y,
         0.f, 0.f, 1.f, p.z,
         0.f, 0.f, 0.f, 1.f
     };
-
-    return Matrix4x4(_m);
 }
 
 Matrix4x4 Matrix4x4::TRS(const Vector3D& translate, const Vector3D& rotation, const Vector3D& scale)
 {
     Matrix3x3 r = Matrix3x3::CreateRotation3DMatrix(rotation);
 
-    return Matrix4x4({
+    return Matrix4x4(
         scale.x * r.m[0], scale.y * r.m[1], scale.z * r.m[2], translate.x,
         scale.x * r.m[3], scale.y * r.m[4], scale.z * r.m[5], translate.y,
         scale.x * r.m[6], scale.y * r.m[7], scale.z * r.m[8], translate.z,
-        0, 0, 0, 1
-        }).Transpose();
+        0.f, 0.f, 0.f, 1.f
+    ).Transposite();
 }
 
 Matrix4x4 Matrix4x4::Perspective(float FOV, float aspect, float zNear, float zFar)
@@ -1653,7 +1711,7 @@ Matrix4x4 Matrix4x4::Perspective(float FOV, float aspect, float zNear, float zFa
 
 Matrix4x4 Matrix4x4::Orthographic(float left, float right, float bottom, float top, float zNear, float zFar)
 {
-    Matrix4x4 result = Matrix4x4::Identity();
+    Matrix4x4 result = Matrix4x4::Identity;
     result.m[0] = 2.f / (right - left);
     result.m[5] = 2.f / (top - bottom);
     result.m[10] = -2.f / (zFar - zNear);
@@ -1665,7 +1723,7 @@ Matrix4x4 Matrix4x4::Orthographic(float left, float right, float bottom, float t
 
 Matrix4x4 Matrix4x4::LookAt(Vector3D position, Vector3D target, Vector3D up)
 {
-    Matrix4x4 result = Matrix4x4::Identity();
+    Matrix4x4 result = Matrix4x4::Identity;
 
     Vector3D f = (target - position).Normalized();
     Vector3D s = f.CrossProduct(up).Normalized();
@@ -1681,23 +1739,23 @@ Matrix4x4 Matrix4x4::LookAt(Vector3D position, Vector3D target, Vector3D up)
 
 Matrix4x4 Matrix4x4::CreateTranslationMatrix(const Vector3D& translation)
 {
-    Matrix4x4 mat = Matrix4x4::Identity();
+    Matrix4x4 mat = Matrix4x4::Identity;
 
     mat.m[3] = -translation.x;
     mat.m[7] = -translation.y;
     mat.m[11] = -translation.z;
 
-    return mat.Transpose();
+    return mat.Transposite();
 }
 
 Matrix4x4 Matrix4x4::CreateScaleMatrix(const Vector3D& scale)
 {
-    Matrix4x4 mat = Matrix4x4::Identity();
+    Matrix4x4 mat = Matrix4x4::Identity;
     mat.m[0] = scale.x;
     mat.m[5] = scale.y;
     mat.m[10] = scale.z;
     mat.m[15] = 1.f;
-    return mat.Transpose();
+    return mat.Transposite();
 
 }
 
@@ -1705,12 +1763,12 @@ Matrix4x4 Matrix4x4::CreateXRotationMatrix(float angle)
 {
     angle *= PI / 180.f;
 
-    Matrix4x4 mat = Matrix4x4::Identity();
-    mat.m[5] = cosf(angle);
-    mat.m[6] = -sinf(angle);
-    mat.m[9] = sinf(angle);
-    mat.m[10] = cosf(angle);
-    return mat.Transpose();
+    Matrix4x4 mat = Matrix4x4::Identity;
+    mat.m[5] = cos(angle);
+    mat.m[6] = -sin(angle);
+    mat.m[9] = sin(angle);
+    mat.m[10] = cos(angle);
+    return mat.Transposite();
 
 }
 
@@ -1718,12 +1776,12 @@ Matrix4x4 Matrix4x4::CreateYRotationMatrix(float angle)
 {
     angle *= PI / 180.f;
 
-    Matrix4x4 mat = Matrix4x4::Identity();
-    mat.m[0] = cosf(angle);
-    mat.m[2] = sinf(angle);
-    mat.m[8] = -sinf(angle);
-    mat.m[10] = cosf(angle);
-    return mat.Transpose();
+    Matrix4x4 mat = Matrix4x4::Identity;
+    mat.m[0] = cos(angle);
+    mat.m[2] = sin(angle);
+    mat.m[8] = -sin(angle);
+    mat.m[10] = cos(angle);
+    return mat.Transposite();
 
 }
 
@@ -1731,12 +1789,12 @@ Matrix4x4 Matrix4x4::CreateZRotationMatrix(float angle)
 {
     angle *= PI / 180.f;
 
-    Matrix4x4 mat = Matrix4x4::Identity();
-    mat.m[0] = cosf(angle);
-    mat.m[1] = -sinf(angle);
-    mat.m[4] = sinf(angle);
-    mat.m[5] = cosf(angle);
-    return mat.Transpose();
+    Matrix4x4 mat = Matrix4x4::Identity;
+    mat.m[0] = cos(angle);
+    mat.m[1] = -sin(angle);
+    mat.m[4] = sin(angle);
+    mat.m[5] = cos(angle);
+    return mat.Transposite();
 
 }
 
@@ -1755,23 +1813,220 @@ void Matrix4x4::Print() const
     }
 }
 
-bool Matrix4x4::operator==(const Matrix4x4& other)
+bool Matrix4x4::operator==(const Matrix4x4& mP)
 {
-    for (int i = 0; i < 16; ++i) {
-        if (m[i] != other.m[i])
-            return false;
-    }
-    return true;
+    return IsEqual(m[0], mP.m[0]) && IsEqual(m[1], mP.m[1]) && IsEqual(m[2], mP.m[2]) && IsEqual(m[3], mP.m[3]) &&
+        IsEqual(m[4], mP.m[4]) && IsEqual(m[5], mP.m[5]) && IsEqual(m[6], mP.m[6]) && IsEqual(m[7], mP.m[7]) &&
+        IsEqual(m[8], mP.m[8]) && IsEqual(m[9], mP.m[9]) && IsEqual(m[10], mP.m[10]) && IsEqual(m[11], mP.m[11]) &&
+        IsEqual(m[12], mP.m[12]) && IsEqual(m[13], mP.m[13]) && IsEqual(m[14], mP.m[14]) && IsEqual(m[15], mP.m[15]);
 }
 
-Vector4D Matrix4x4::operator*(Vector4D& v)
+float Matrix4x4::operator[](int index)
 {
-    return MultriplyVector4D(v);
+    if (index >= 0 && index <= 15)
+        return m[index];
+    else
+        return m[15];
 }
 
-Matrix4x4 Matrix4x4::operator*(const Matrix4x4& v)
+Matrix4x4 Matrix4x4::operator+(const Matrix4x4& mP)
+{ 
+    return AddMatrix(mP);
+}
+
+Matrix4x4 Matrix4x4::operator+(const MatrixND& mP) 
+{ 
+    return AddMatrix(mP);
+}
+
+Matrix4x4 Matrix4x4::operator+(float x)
 {
-    return MultiplyMatrix(v);
+    return {
+        m[0] + x,  m[1] + x,  m[2] + x,  m[3] + x,
+        m[4] + x,  m[5] + x,  m[6] + x,  m[7] + x,
+        m[8] + x,  m[9] + x,  m[10] + x, m[11] + x,
+        m[12] + x, m[13] + x, m[14] + x, m[15] + x
+    };
+}
+
+void Matrix4x4::operator+=(const Matrix4x4& mP)
+{
+    m[0] += mP.m[0];   m[1] += mP.m[1];   m[2] += mP.m[2];   m[3] += mP.m[3];
+    m[4] += mP.m[4];   m[5] += mP.m[5];   m[6] += mP.m[6];   m[7] += mP.m[7];
+    m[8] += mP.m[8];   m[9] += mP.m[9];   m[10] += mP.m[10]; m[11] += mP.m[11];
+    m[12] += mP.m[12]; m[13] += mP.m[13]; m[14] += mP.m[14]; m[15] += mP.m[15];
+}
+
+void Matrix4x4::operator+=(const MatrixND& mP)
+{
+    if (mP.lines != 4 || mP.columns != 4) 
+        return;
+
+    m[0] += mP.m[0];   m[1] += mP.m[1];   m[2] += mP.m[2];   m[3] += mP.m[3];
+    m[4] += mP.m[4];   m[5] += mP.m[5];   m[6] += mP.m[6];   m[7] += mP.m[7];
+    m[8] += mP.m[8];   m[9] += mP.m[9];   m[10] += mP.m[10]; m[11] += mP.m[11];
+    m[12] += mP.m[12]; m[13] += mP.m[13]; m[14] += mP.m[14]; m[15] += mP.m[15];
+}
+
+void Matrix4x4::operator+=(float x)
+{
+    m[0] += x;  m[1] += x, m[2] += x, m[3] += x,
+        m[4] += x, m[5] += x, m[6] += x, m[7] += x,
+        m[8] += x, m[9] += x, m[10] += x, m[11] += x,
+        m[12] += x, m[13] += x, m[14] += x, m[15] += x;
+}
+
+Matrix4x4 Matrix4x4::operator-(const Matrix4x4& mP)
+{
+    return {
+        m[0] - mP.m[0], m[1] - mP.m[1], m[2] - mP.m[2], m[3] - mP.m[3],
+        m[4] - mP.m[4], m[5] - mP.m[5], m[6] - mP.m[6], m[7] - mP.m[7],
+        m[8] - mP.m[8], m[9] - mP.m[9], m[10] - mP.m[10], m[11] - mP.m[11],
+        m[12] - mP.m[12], m[13] - mP.m[13], m[14] - mP.m[14], m[15] - mP.m[15]
+    };
+}
+
+Matrix4x4 Matrix4x4::operator-(const MatrixND& mat)
+{
+    if (mat.lines != 4 || mat.columns != 4) 
+        return Matrix4x4::Zero;
+
+    return {
+        m[0] - mat.m[0], m[1] - mat.m[1], m[2] - mat.m[2], m[3] - mat.m[3],
+        m[4] - mat.m[4], m[5] - mat.m[5], m[6] - mat.m[6], m[7] - mat.m[7],
+        m[8] - mat.m[8], m[9] - mat.m[9], m[10] - mat.m[10], m[11] - mat.m[11],
+        m[12] - mat.m[12], m[13] - mat.m[13], m[14] - mat.m[14], m[15] - mat.m[15]
+    };
+}
+
+Matrix4x4 Matrix4x4::operator-(float x)
+{
+    return {
+        m[0] - x,  m[1] - x,  m[2] - x,  m[3] - x,
+        m[4] - x,  m[5] - x,  m[6] - x,  m[7] - x,
+        m[8] - x,  m[9] - x,  m[10] - x, m[11] - x,
+        m[12] - x, m[13] - x, m[14] - x, m[15] - x
+    };
+}
+
+void Matrix4x4::operator-=(const Matrix4x4& mP)
+{
+    m[0] -= mP.m[0];   m[1] -= mP.m[1];   m[2] -= mP.m[2];   m[3] -= mP.m[3];
+    m[4] -= mP.m[4];   m[5] -= mP.m[5];   m[6] -= mP.m[6];   m[7] -= mP.m[7];
+    m[8] -= mP.m[8];   m[9] -= mP.m[9];   m[10] -= mP.m[10]; m[11] -= mP.m[11];
+    m[12] -= mP.m[12]; m[13] -= mP.m[13]; m[14] -= mP.m[14]; m[15] -= mP.m[15];
+}
+
+void Matrix4x4::operator-=(const MatrixND& mP)
+{
+    if (mP.lines != 4 || mP.columns!= 4)
+        return;
+
+    m[0] -= mP.m[0];   m[1] -= mP.m[1];   m[2] -= mP.m[2];   m[3] -= mP.m[3];
+    m[4] -= mP.m[4];   m[5] -= mP.m[5];   m[6] -= mP.m[6];   m[7] -= mP.m[7];
+    m[8] -= mP.m[8];   m[9] -= mP.m[9];   m[10] -= mP.m[10]; m[11] -= mP.m[11];
+    m[12] -= mP.m[12]; m[13] -= mP.m[13]; m[14] -= mP.m[14]; m[15] -= mP.m[15];
+}
+
+void Matrix4x4::operator-=(float x)
+{
+    m[0] -= x;  m[1] -= x, m[2] -= x, m[3] -= x,
+        m[4] -= x, m[5] -= x, m[6] -= x, m[7] -= x,
+        m[8] -= x, m[9] -= x, m[10] -= x, m[11] - x,
+        m[12] -= x, m[13] - x, m[14] - x, m[15] - x;
+}
+
+Matrix4x4 Matrix4x4::operator*(const Matrix4x4& mP) 
+{ 
+    return MultiplyMatrix(mP); 
+}
+
+MatrixND Matrix4x4::operator*(const MatrixND& mP) 
+{ 
+    return MultiplyMatrix(mP); 
+}
+
+Vector4D Matrix4x4::operator*(const Vector4D& v) 
+{ 
+    return MultiplyVector4D(v); 
+}
+
+Vector4D Matrix4x4::operator*(Vector4D& v) 
+{ 
+    return MultiplyVector4D(v); 
+}
+
+Matrix4x4 Matrix4x4::operator*(float x) 
+{ 
+    return MultiplyScalar(x); 
+}
+
+void Matrix4x4::operator*=(const Matrix4x4& mP)
+{
+    m[0] *= mP.m[0];   m[1] *= mP.m[1];   m[2] *= mP.m[2];   m[3] *= mP.m[3];
+    m[4] *= mP.m[4];   m[5] *= mP.m[5];   m[6] *= mP.m[6];   m[7] *= mP.m[7];
+    m[8] *= mP.m[8];   m[9] *= mP.m[9];   m[10] *= mP.m[10]; m[11] *= mP.m[11];
+    m[12] *= mP.m[12]; m[13] *= mP.m[13]; m[14] *= mP.m[14]; m[15] *= mP.m[15];
+}
+
+void Matrix4x4::operator*=(float x)
+{
+    m[0] *= x;  m[1] *= x, m[2] *= x, m[3] *= x,
+        m[4] *= x, m[5] *= x, m[6] *= x, m[7] *= x,
+        m[8] *= x, m[9] *= x, m[10] *= x, m[11] *= x,
+        m[12] *= x, m[13] *= x, m[14] *= x, m[15] *= x;
+}
+
+Matrix4x4 Matrix4x4::operator/(float x)
+{
+    if (IsEqualZero(x)) return Matrix4x4::Zero;
+    return {
+        m[0] / x,  m[1] / x,  m[2] / x,  m[3] / x,
+        m[4] / x,  m[5] / x,  m[6] / x,  m[7] / x,
+        m[8] / x,  m[9] / x,  m[10] / x, m[11] / x,
+        m[12] / x, m[13] / x, m[14] / x, m[15] / x
+    };
+}
+
+Matrix4x4 Matrix4x4::operator/(const Matrix4x4& mP)
+{
+    if (IsEqualZero(mP.m[0]) || IsEqualZero(mP.m[1]) || IsEqualZero(mP.m[2]) || IsEqualZero(mP.m[3]) ||
+        IsEqualZero(mP.m[4]) || IsEqualZero(mP.m[5]) || IsEqualZero(mP.m[6]) || IsEqualZero(mP.m[7]) ||
+        IsEqualZero(mP.m[8]) || IsEqualZero(mP.m[9]) || IsEqualZero(mP.m[10]) || IsEqualZero(mP.m[11]) ||
+        IsEqualZero(mP.m[12]) || IsEqualZero(mP.m[13]) || IsEqualZero(mP.m[14]) || IsEqualZero(mP.m[15]))
+        return Matrix4x4::Zero;
+
+    return {
+        m[0] / mP.m[0], m[1] / mP.m[1], m[2] / mP.m[2], m[3] / mP.m[3],
+        m[4] / mP.m[4], m[5] / mP.m[5], m[6] / mP.m[6], m[7] / mP.m[7],
+        m[8] / mP.m[8], m[9] / mP.m[9], m[10] / mP.m[10], m[11] / mP.m[11],
+        m[12] / mP.m[12], m[13] / mP.m[13], m[14] / mP.m[14], m[15] / mP.m[15]
+    };
+}
+
+void Matrix4x4::operator/=(float x)
+{
+    if (IsEqualZero(x)) 
+        return;
+
+    m[0] /= x;  m[1] /= x, m[2] /= x, m[3] /= x,
+        m[4] /= x, m[5] /= x, m[6] /= x, m[7] /= x,
+        m[8] /= x, m[9] /= x, m[10] /= x, m[11] / x,
+        m[12] /= x, m[13] / x, m[14] / x, m[15] / x;
+}
+
+void Matrix4x4::operator/=(const Matrix4x4& mP)
+{
+    if (IsEqualZero(mP.m[0]) || IsEqualZero(mP.m[1]) || IsEqualZero(mP.m[2]) || IsEqualZero(mP.m[3]) ||
+        IsEqualZero(mP.m[4]) || IsEqualZero(mP.m[5]) || IsEqualZero(mP.m[6]) || IsEqualZero(mP.m[7]) ||
+        IsEqualZero(mP.m[8]) || IsEqualZero(mP.m[9]) || IsEqualZero(mP.m[10]) || IsEqualZero(mP.m[11]) ||
+        IsEqualZero(mP.m[12]) || IsEqualZero(mP.m[13]) || IsEqualZero(mP.m[14]) || IsEqualZero(mP.m[15]))
+        return;
+
+    m[0] /= mP.m[0];   m[1] /= mP.m[1];   m[2] /= mP.m[2];   m[3] /= mP.m[3];
+    m[4] /= mP.m[4];   m[5] /= mP.m[5];   m[6] /= mP.m[6];   m[7] /= mP.m[7];
+    m[8] /= mP.m[8];   m[9] /= mP.m[9];   m[10] /= mP.m[10]; m[11] /= mP.m[11];
+    m[12] /= mP.m[12]; m[13] /= mP.m[13]; m[14] /= mP.m[14]; m[15] /= mP.m[15];
 }
 
 void Matrix4x4::RoundMatrix()
