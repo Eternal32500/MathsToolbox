@@ -8,9 +8,6 @@ namespace Core
 	{
 		class Quaternion;
 
-		bool IsEqualZero(float num);
-		bool IsEqual(float a, float b);
-
 		class Vector2D
 		{
 		public:
@@ -31,6 +28,7 @@ namespace Core
 			float DotProduct(const Vector2D& v) const;
 			float CrossProduct(const Vector2D& v) const;
 			float Angle(const Vector2D& v) const;
+			Vector2D Opposite() const;
 			Vector2D MidPoint(const Vector2D& v) const;
 			Vector2D Normalized() const;
 			Vector2D ClampMagnitude(float maxLength) const;
@@ -43,6 +41,8 @@ namespace Core
 			Vector2D ScaleAround(float s, const Vector2D& p) const;
 			Vector2D ScaleAround(const Vector2D& s, const Vector2D& p) const;
 			static Vector2D Lerp(const Vector2D& start, const Vector2D& end, float t);
+
+			#pragma region Vector2D operators
 
 			Vector2D operator+(const Vector2D& v);
 			Vector2D operator-(const Vector2D& v);
@@ -79,6 +79,8 @@ namespace Core
 			const float& operator[](int index) const;
 
 			bool operator==(const Vector2D& v) const;
+
+			#pragma endregion
 
 			static const Vector2D Zero;
 			static const Vector2D One;
@@ -127,6 +129,8 @@ namespace Core
 			Vector3D ScaleAround(const Vector3D& s, const Vector3D& p) const;
 			static Vector3D Lerp(const Vector3D& start, const Vector3D& end, float t);
 
+			#pragma region Vector3D operators
+
 			Vector3D operator+(const Vector3D& v);
 			Vector3D operator-(const Vector3D& v);
 			Vector3D operator*(const Vector3D& v);
@@ -162,6 +166,8 @@ namespace Core
 			const float& operator[](int index) const;
 			bool operator==(const Vector3D& v) const;
 
+			#pragma endregion
+
 			static const Vector3D Zero;
 			static const Vector3D One;
 			static const Vector3D Up;
@@ -178,7 +184,7 @@ namespace Core
 			float z = 0.f;
 			float w = 0.f;
 
-			Vector4D() = default;
+			Vector4D();
 			Vector4D(float _x, float _y, float _z, float _w);
 			Vector4D(const Vector3D& v, float _w);
 			~Vector4D() = default;
@@ -188,13 +194,21 @@ namespace Core
 			float SquaredMagnitude() const;
 			float Magnitude() const;
 			float DotProduct(const Vector4D& v) const;
+
 			Vector4D Opposite() const;
 			Vector4D MidPoint(const Vector4D& v) const;
+			static Vector4D Lerp(const Vector4D& start, const Vector4D& end, float t);
+
+			#pragma region Vector4D operators
 
 			Vector4D operator+(const Vector4D& v);
 			Vector4D operator-(const Vector4D& v);
 			Vector4D operator*(const Vector4D& v);
 			Vector4D operator/(const Vector4D& v);
+			const Vector4D operator+(const Vector4D& v) const;
+			const Vector4D operator-(const Vector4D& v) const;
+			const Vector4D operator*(const Vector4D& v) const;
+			const Vector4D operator/(const Vector4D& v) const;
 
 			void operator+=(const Vector4D& v);
 			void operator-=(const Vector4D& v);
@@ -205,61 +219,27 @@ namespace Core
 			Vector4D operator-(const float f);
 			Vector4D operator*(const float f);
 			Vector4D operator/(const float f);
+			const Vector4D operator+(const float f) const;
+			const Vector4D operator-(const float f) const;
+			const Vector4D operator*(const float f) const;
+			const Vector4D operator/(const float f) const;
 
 			void operator+=(const float f);
 			void operator-=(const float f);
 			void operator*=(const float f);
 			void operator/=(const float f);
 
+			Vector4D operator-();
+			const Vector4D& operator-() const;
+
 			float& operator[](int index);
 			const float& operator[](int index) const;
+			bool operator==(const Vector4D& v) const;
+
+			#pragma endregion
 
 			static const Vector4D Zero;
 			static const Vector4D One;
-		};
-
-		class VectorND
-		{
-		public:
-			std::vector<float> coordinates;
-
-			VectorND(std::vector<float> _coordinates);
-			~VectorND() = default;
-
-			VectorND Opposite() const;
-			VectorND MidPoint(const VectorND& v) const;
-			float Distance(const VectorND& v) const;
-			float SquaredMagnitude() const;
-			float Magnitude() const;
-			float DotProduct(const VectorND& v) const;
-			int GetSize() const;
-			void Print() const;
-
-			VectorND operator+(const VectorND& v);
-			VectorND operator-(const VectorND& v);
-			VectorND operator*(const VectorND& v);
-			VectorND operator/(const VectorND& v);
-
-			void operator+=(const VectorND& v);
-			void operator-=(const VectorND& v);
-			void operator*=(const VectorND& v);
-			void operator/=(const VectorND& v);
-
-			VectorND operator+(const float f);
-			VectorND operator-(const float f);
-			VectorND operator*(const float f);
-			VectorND operator/(const float f);
-
-			void operator+=(const float f);
-			void operator-=(const float f);
-			void operator*=(const float f);
-			void operator/=(const float f);
-
-			float& operator[](int index);
-			const float& operator[](int index) const;
-
-		private:
-			int size = 0;
 		};
 	}
 }

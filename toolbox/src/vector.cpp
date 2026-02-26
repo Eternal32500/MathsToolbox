@@ -6,16 +6,6 @@
 
 using namespace Core::Maths;
 
-bool Core::Maths::IsEqualZero(float num)
-{
-    return std::fabs(num) < tolerance;
-}
-
-bool Core::Maths::IsEqual(float a, float b)
-{
-    return std::fabs(a - b) < tolerance;
-}
-
 #pragma region Vector2D
 
 const Vector2D Vector2D::Up = Vector2D(0.f, 1.f);
@@ -37,9 +27,14 @@ Vector2D::Vector2D(float n)
     : x(n), y(n)
 {}
 
+
 Vector2D::Vector2D(Vector2D p1, Vector2D p2)
     :x(p2.x - p1.x), y(p2.y - p1.y)
 {}
+Vector2D Vector2D::Opposite() const
+{
+    return { -x, -y };
+}
 
 Vector2D Vector2D::MidPoint(const Vector2D& v) const
 {
@@ -331,7 +326,12 @@ bool Vector2D::operator==(const Vector2D& v) const
 
 Vector2D Vector2D::operator-()
 {
-	return Vector2D(-x, -y);
+	return Opposite();
+}
+
+const Vector2D& Vector2D::operator-() const
+{
+    return Opposite();
 }
 
 #pragma endregion
@@ -515,6 +515,12 @@ Vector3D Vector3D::ScaleAround(const Vector3D& s, const Vector3D& p) const
     return t * s + p;
 }
 
+
+Vector3D Vector3D::Lerp(const Vector3D& start, const Vector3D& end, float t)
+{
+    return start + (end - start) * t;
+}
+
 #pragma region Vector3D Operators
 
 Vector3D Vector3D::operator-()
@@ -525,11 +531,6 @@ Vector3D Vector3D::operator-()
 const Vector3D& Vector3D::operator-() const
 {
     return Opposite();
-}
-
-Vector3D Vector3D::Lerp(const Vector3D& start, const Vector3D& end, float t)
-{
-    return start + (end - start) * t;
 }
 
 Vector3D Vector3D::operator+(const Vector3D& v)
@@ -707,7 +708,12 @@ bool Vector3D::operator==(const Vector3D& v) const
 const Vector4D Vector4D::Zero = Vector4D(0.f, 0.f, 0.f, 0.f);
 const Vector4D Vector4D::One = Vector4D(1.f, 1.f, 1.f, 1.f);
 
-Vector4D::Vector4D(float _x, float _y, float _z, float _w) 
+Vector4D::Vector4D()
+    :x(0.f), y(0.f), z(0.f), w(0.f)
+{
+}
+
+Vector4D::Vector4D(float _x, float _y, float _z, float _w)
     : x(_x), y(_y), z(_z), w(_w)
 {}
 
@@ -723,6 +729,11 @@ Vector4D Vector4D::Opposite() const
 Vector4D Vector4D::MidPoint(const Vector4D& v) const
 {
     return Vector4D((x + v.x) / 2, (y + v.y) / 2, (z + v.z) / 2, (w + v.w) / 2);
+}
+
+Vector4D Vector4D::Lerp(const Vector4D& start, const Vector4D& end, float t)
+{
+    return start + (end - start) * t;
 }
 
 float Vector4D::Distance(const Vector4D& v) const
@@ -750,6 +761,8 @@ void Vector4D::Print() const
     std::cout << "(" << (IsEqualZero(x) ? 0.f : x) << ", " << (IsEqualZero(y) ? 0.f : y) << ", " << (IsEqualZero(z) ? 0.f : z) << ", " << (IsEqualZero(w) ? 0.f : w) << ")" << std::endl;
 }
 
+#pragma region Vector4D Operators
+
 Vector4D Vector4D::operator+(const Vector4D& v)
 {
     return { x + v.x, y + v.y, z + v.z, w + v.w };
@@ -769,6 +782,31 @@ Vector4D Vector4D::operator/(const Vector4D& v)
 {
     return { 
         (IsEqualZero(v.x) ? 0.f : x / v.x), 
+        (IsEqualZero(v.y) ? 0.f : y / v.y),
+        (IsEqualZero(v.z) ? 0.f : z / v.z),
+        (IsEqualZero(v.w) ? 0.f : w / v.w)
+    };
+}
+
+const Vector4D Vector4D::operator+(const Vector4D& v) const
+{
+    return { x + v.x, y + v.y, z + v.z, w + v.w };
+}
+
+const Vector4D Vector4D::operator-(const Vector4D& v) const
+{
+    return { x - v.x, y - v.y, z - v.z, w - v.w };
+}
+
+const Vector4D Vector4D::operator*(const Vector4D& v) const
+{
+    return { x * v.x, y * v.y, z * v.z, w * v.w };
+}
+
+const Vector4D Vector4D::operator/(const Vector4D& v) const
+{
+    return {
+        (IsEqualZero(v.x) ? 0.f : x / v.x),
         (IsEqualZero(v.y) ? 0.f : y / v.y),
         (IsEqualZero(v.z) ? 0.f : z / v.z),
         (IsEqualZero(v.w) ? 0.f : w / v.w)
@@ -824,7 +862,29 @@ Vector4D Vector4D::operator*(const float f)
 
 Vector4D Vector4D::operator/(const float f)
 {
-    Vector4D r;
+    Vector4D r{};
+    IsEqualZero(f) ? r = Vector4D::Zero : r = Vector4D(x / f, y / f, z / f, w / f);
+    return r;
+}
+
+const Vector4D Vector4D::operator+(const float f) const
+{
+    return { x + f, y + f, z + f, w + f };
+}
+
+const Vector4D Vector4D::operator-(const float f) const
+{
+    return { x - f, y - f, z - f, w - f };
+}
+
+const Vector4D Vector4D::operator*(const float f) const
+{
+    return { x * f, y * f, z * f, w * f };
+}
+
+const Vector4D Vector4D::operator/(const float f) const
+{
+    Vector4D r{};
     IsEqualZero(f) ? r = Vector4D::Zero : r = Vector4D(x / f, y / f, z / f, w / f);
     return r;
 }
@@ -856,6 +916,16 @@ void Vector4D::operator*=(const float f)
 void Vector4D::operator/=(const float f)
 {
     IsEqualZero(f) ? *this = Vector4D::Zero : Vector4D(x += f, y += f, z += f, w += f);
+}
+
+Vector4D Vector4D::operator-()
+{
+    return Opposite();
+}
+
+const Vector4D& Vector4D::operator-() const
+{
+    return Opposite();
 }
 
 float& Vector4D::operator[](int index)
@@ -895,243 +965,12 @@ const float& Vector4D::operator[](int index) const
         break;
     }
 }
+
+bool Vector4D::operator==(const Vector4D& v) const
+{
+    return IsEqual(x, v.x) && IsEqual(y, v.y) && IsEqual(z, v.z) && IsEqual(w, v.w);
+}
+
 #pragma endregion
 
-#pragma region VectorND
-VectorND::VectorND(std::vector<float> _coordinates)
-{
-    for (float coordinate : _coordinates)
-        coordinates.push_back(coordinate);
-
-    size = static_cast<int>(coordinates.size());
-}
-
-VectorND VectorND::Opposite() const
-{
-    std::vector<float> coords;
-    for (int i = 0; coordinates.size(); ++i)
-        coords[i] = -coordinates[i];
-
-    return VectorND(coords);
-}
-
-VectorND VectorND::MidPoint(const VectorND& v) const
-{
-    std::vector<float> coords;
-    if (v.coordinates.size() != size)
-        return VectorND(coords);
-
-    for (int i = 0; i < size; ++i)
-        coords.push_back((coordinates[i] + v.coordinates[i]) / 2);
-
-    return VectorND(coords);
-}
-
-float VectorND::Distance(const VectorND& v) const
-{
-    float distance = 0.f;
-    if (v.coordinates.size() != size)
-        return distance;
-
-    for (int i = 0; i < size; ++i)
-        distance += static_cast<float>(std::pow(coordinates[i] - v.coordinates[i], 2));
-
-    distance = sqrtf(distance);
-
-    return distance;
-}
-
-float VectorND::SquaredMagnitude() const
-{
-    float SquaredMagnitude = 0.f;
-    for (int i = 0; i < size; ++i)
-        SquaredMagnitude += static_cast<float>(std::pow(coordinates[i], 2));
-
-    return SquaredMagnitude;
-}
-
-float VectorND::Magnitude() const
-{
-    return std::sqrtf(SquaredMagnitude());
-}
-
-float VectorND::DotProduct(const VectorND& v) const
-{
-    float dotResult = 0.f;
-    if (v.coordinates.size() != size)
-        return dotResult;
-
-    for (int i = 0; i < size; ++i)
-        dotResult += coordinates[i] * v.coordinates[i];
-
-    return dotResult;
-}
-
-int VectorND::GetSize() const
-{
-    return size;
-}
-
-void VectorND::Print() const
-{
-    int size = static_cast<int>(coordinates.size());
-    std::cout << "(";
-    for (int i = 0; i < size; ++i)
-    {
-        if(i != size - 1)
-            std::cout << coordinates[i] << ", ";
-        else 
-            std::cout << coordinates[i];
-    }
-    std::cout << ")" << std::endl;
-}
-
-VectorND VectorND::operator+(const VectorND& v)
-{
-    std::vector<float> coords;
-
-    if (v.coordinates.size() != size)
-        return VectorND(coords);
-
-    for (int i = 0; i < size; ++i)
-        coords.push_back(coordinates[i] + v.coordinates[i]);
-
-    return VectorND(coords);
-}
-
-VectorND VectorND::operator-(const VectorND& v)
-{
-    std::vector<float> coords;
-
-    if (v.coordinates.size() != size)
-        return VectorND(coords);
-
-    for (int i = 0; i < size; ++i)
-        coords.push_back(coordinates[i] - v.coordinates[i]);
-
-    return VectorND(coords);
-}
-
-VectorND VectorND::operator*(const VectorND& v)
-{
-    std::vector<float> coords;
-
-    if (v.coordinates.size() != size)
-        return VectorND(coords);
-
-    for (int i = 0; i < size; ++i)
-        coords.push_back(coordinates[i] * v.coordinates[i]);
-
-    return VectorND(coords);
-}
-
-VectorND VectorND::operator/(const VectorND& v)
-{
-    std::vector<float> coords;
-
-    if (v.coordinates.size() != size)
-        return VectorND(coords);
-
-    for (int i = 0; i < size; ++i)
-    {
-        if (IsEqualZero(v.coordinates[i]))
-            return *this;
-
-        coords.push_back(coordinates[i] / v.coordinates[i]);
-    }
-
-    return VectorND(coords);
-}
-
-void VectorND::operator+=(const VectorND& v)
-{
-    std::vector<float> coords;
-
-    if (v.coordinates.size() != size)
-        coordinates = coords;
-
-    for (int i = 0; i < size; ++i)
-        coords.push_back(coordinates[i] + v.coordinates[i]);
-}
-
-void VectorND::operator-=(const VectorND& v)
-{
-    *this = SubstractVector(v);
-}
-
-void VectorND::operator*=(const VectorND& v)
-{
-    *this = MultiplyVector(v);
-}
-
-void VectorND::operator/=(const VectorND& v)
-{
-    *this = DivideVector(v);
-}
-
-VectorND VectorND::operator+(const float f)
-{
-    return AddScalar(f);
-}
-
-VectorND VectorND::operator-(const float f)
-{
-    std::vector<float> coords;
-
-    for (int i = 0; i < size; ++i)
-        coords.push_back(coordinates[i] - f);
-
-    return VectorND(coords);
-}
-
-VectorND VectorND::operator*(const float f)
-{
-    std::vector<float> coords;
-
-    for (int i = 0; i < size; ++i)
-        coords.push_back(coordinates[i] * f);
-
-    return VectorND(coords);
-}
-
-VectorND VectorND::operator/(const float f)
-{
-    std::vector<float> coords;
-    if (IsEqualZero(f))
-        return *this;
-
-    for (int i = 0; i < size; ++i)
-        coords.push_back(coordinates[i] / f);
-
-    return VectorND(coords);
-}
-
-void VectorND::operator+=(const float f)
-{
-    *this = AddScalar(f);
-}
-
-void VectorND::operator-=(const float f)
-{
-    *this = SubstractScalar(f);
-}
-
-void VectorND::operator*=(const float f)
-{
-    *this = MultiplyScalar(f);
-}
-
-void VectorND::operator/=(const float f)
-{
-    *this = DivideScalar(f);
-}
-
-float& VectorND::operator[](int index)
-{
-    return coordinates[index];
-}
-const float& VectorND::operator[](int index) const
-{
-    return coordinates[index];
-}
 #pragma endregion
