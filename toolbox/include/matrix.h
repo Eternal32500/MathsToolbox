@@ -88,25 +88,37 @@ namespace Core
 		class Matrix3x3
 		{
 		public:
-			float m[9];
+			float m[9] {
+				0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f
+			};
 
-			static Matrix3x3 Identity();
+			static const Matrix3x3 Identity;
+			static const Matrix3x3 Zero;
 
+			Matrix3x3();
+			Matrix3x3(std::vector<float> vertex);
 			Matrix3x3(float _m[9]);
-			Matrix3x3(float, float, float, float, float, float, float, float, float);
+			Matrix3x3(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3);
+			Matrix3x3(float n1, float n2, float n3,
+				float n4, float n5, float n6,
+				float n7, float n8, float n9);
+			Matrix3x3(float components);
 			Matrix3x3(Matrix4x4 mat);
+
 			~Matrix3x3() = default;
 
 			Vector3D Diagonal() const;
 			float Trace() const;
 			Matrix3x3 Opposite() const;
-			Matrix3x3 Transpose() const;
+			Matrix3x3 Transposite() const;
 			Matrix3x3 AddMatrix(const Matrix3x3& mat) const;
 			Matrix3x3 AddMatrix(const MatrixND& mat) const;
 			Matrix3x3 MultiplyScalar(float f) const;
 			Matrix3x3 MultiplyMatrix(const Matrix3x3& mat) const;
 			MatrixND MultiplyMatrix(const MatrixND& mat) const;
-			Vector3D MultriplyVector3D(Vector3D& vec) const;
+			Vector3D MultiplyVector3D(const Vector3D& vec) const;
 			float Determinant() const;
 			MatrixND ExpandRight(const Matrix3x3& mat) const;
 			MatrixND ExpandRight(const MatrixND& mat) const;
@@ -119,8 +131,35 @@ namespace Core
 
 			void Print() const;
 
+			bool operator==(const Matrix3x3&);
+			float operator[](int);
+
+			Matrix3x3 operator+(const Matrix3x3&);
+			Matrix3x3 operator+(const MatrixND&);
+			Matrix3x3 operator+(float);
+			void operator+=(const Matrix3x3&);
+			void operator+=(const MatrixND&);
+			void operator+=(float);
+
+			Matrix3x3 operator-(const Matrix3x3&);
+			Matrix3x3 operator-(const MatrixND&);
+			Matrix3x3 operator-(float);
+			void operator-=(const Matrix3x3&);
+			void operator-=(const MatrixND&);
+			void operator-=(float);
+
+			Matrix3x3 operator*(const Matrix3x3&);
+			MatrixND operator*(const MatrixND&);
+			Vector3D operator*(const Vector3D&);
 			Vector3D operator*(Vector3D& v);
-			Matrix3x3 operator*(const Matrix3x3& m);
+			Matrix3x3 operator*(float);
+			void operator*=(const Matrix3x3&);
+			void operator*=(float);
+
+			Matrix3x3 operator/(float);
+			Matrix3x3 operator/(const Matrix3x3&);
+			void operator/=(float);
+			void operator/=(const Matrix3x3&);
 
 		private:
 			void RoundMatrix();
