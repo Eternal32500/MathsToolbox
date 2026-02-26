@@ -2059,10 +2059,15 @@ bool Matrix4x4::NearZero(float num) const
 #pragma endregion
 
 #pragma region MatrixND
-MatrixND::MatrixND(int _lines, int _columns, std::vector<float> _m) : lines(_lines), columns(_columns), m(_m)
-{
-    size = lines * columns;
 
+MatrixND::MatrixND(int _lines, int _columns, std::vector<float> _m) : lines(_lines), columns(_columns), m(_m), size(lines * columns)
+{
+    RoundMatrix();
+}
+
+MatrixND::MatrixND(int _lines, int _columns) : lines(_lines), columns(_columns), size(lines* columns)
+{
+    m.reserve(size);
     RoundMatrix();
 }
 
@@ -2174,7 +2179,7 @@ MatrixND MatrixND::ExpandRight(const MatrixND& mat) const
     return MatrixND(lines, columns + mat.columns, _m);
 }
 
-MatrixND MatrixND::Identity() const
+MatrixND MatrixND::Identity(int lines, int columns)
 {
     std::vector<float> coords;
     int index = 0;
@@ -2191,6 +2196,22 @@ MatrixND MatrixND::Identity() const
                 coords.push_back(0.f);
         }
     }
+    return MatrixND(lines, columns, coords);
+}
+
+MatrixND Core::Maths::MatrixND::Zero(int lines, int columns)
+{
+    std::vector<float> coords;
+    int index = 0;
+
+    for (int i = 0; i < lines; ++i)
+    {
+        for (int j = 0; j < columns; ++j)
+        {
+            coords.push_back(0.f);
+        }
+    }
+
     return MatrixND(lines, columns, coords);
 }
 
@@ -2243,7 +2264,7 @@ MatrixND MatrixND::Inverse() const
     std::vector<float> _m;
     int width = columns * 2;
 
-    MatrixND mat(lines, width, ExpandRight(Identity()).m);
+    MatrixND mat(lines, width, ExpandRight(Identity(lines, columns)).m);
     mat = mat.Pivot();
 
     for (int i = 0; i < lines; ++i)
@@ -2407,4 +2428,142 @@ float MatrixND::Determinant() const
     }
     return det;
 }
+
+bool MatrixND::operator==(const MatrixND& mPrime)
+{
+    if (lines != mPrime.lines || columns != mPrime.columns)
+        return false;
+
+    for (int i = 0; i < size; ++i)
+    {
+        if (!IsEqual(m[i], mPrime.m[i]))
+            return false;
+    }
+    return true;
+}
+
+float MatrixND::operator[](int index)
+{
+    if (index < 0 || index >= size)
+        return 0.0f;
+
+    return m[index];
+}
+
+MatrixND MatrixND::operator+(const MatrixND& mPrime)
+{
+    return AddMatrix(mPrime);
+}
+
+MatrixND MatrixND::operator+(float x)
+{
+    MatrixND result(lines, columns);
+    for (int i = 0; i < size; ++i)
+        result.m[i] = m[i] + x;
+    return result;
+}
+
+void MatrixND::operator+=(const MatrixND& mPrime)
+{
+    if (lines != mPrime.lines || columns != mPrime.columns)
+        return;
+
+    for (int i = 0; i < size; ++i)
+        m[i] += mPrime.m[i];
+}
+
+void MatrixND::operator+=(float x)
+{
+    for (int i = 0; i < size; ++i)
+        m[i] += x;
+}
+
+MatrixND MatrixND::operator-(const MatrixND& mPrime)
+{
+    if (lines != mPrime.lines || columns != mPrime.columns)
+        return MatrixND::Zero(lines, columns);
+
+    MatrixND result(lines, columns);
+    for (int i = 0; i < size; ++i)
+        result.m[i] = m[i] - mPrime.m[i];
+    return result;
+}
+
+MatrixND MatrixND::operator-(float x)
+{
+    MatrixND result(lines, columns);
+    for (int i = 0; i < size; ++i)
+        result.m[i] = m[i] - x;
+    return result;
+}
+
+void MatrixND::operator-=(const MatrixND& mPrime)
+{
+    if (lines != mPrime.lines || columns != mPrime.columns)
+        return;
+
+    for (int i = 0; i < size; ++i)
+        m[i] -= mPrime.m[i];
+}
+
+void MatrixND::operator-=(float x)
+{
+    for (int i = 0; i < size; ++i)
+        m[i] -= x;
+}
+
+MatrixND MatrixND::operator*(const MatrixND& mPrime)
+{
+    return MultiplyMatrix(mPrime);
+}
+
+MatrixND MatrixND::operator*(float x)
+{
+    MatrixND result(lines, columns);
+    for (int i = 0; i < size; ++i)
+        result.m[i] = m[i] * x;
+    return result;
+}
+
+void MatrixND::operator*=(float x)
+{
+    for (int i = 0; i < size; ++i)
+        m[i] *= x;
+}
+
+MatrixND MatrixND::operator/(float x)
+{
+    if (IsEqualZero(x))
+        return MatrixND::Zero(lines, columns);
+
+    MatrixND result(lines, columns);
+    for (int i = 0; i < size; ++i)
+        result.m[i] = m[i] / x;
+    return result;
+}
+
+void MatrixND::operator/=(float x)
+{
+    if (IsEqualZero(x))
+        return;
+
+    for (int i = 0; i < size; ++i)
+        m[i] /= x;
+}
+
+MatrixND MatrixND::operator/(const MatrixND& mPrime)
+{
+    if (lines != mPrime.lines || columns != mPrime.columns)
+        return MatrixND::Zero(lines, columns);
+
+    MatrixND result(lines, columns);
+    for (int i = 0; i < size; ++i)
+    {
+        if (IsEqualZero(mPrime.m[i])) 
+            return MatrixND::Zero(lines, columns);
+        result.m[i] = m[i] / mPrime.m[i];
+    }
+    return result;
+}
+
 #pragma endregion

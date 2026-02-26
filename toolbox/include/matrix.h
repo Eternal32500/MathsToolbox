@@ -259,12 +259,14 @@ namespace Core
 		class MatrixND
 		{
 		public:
+
 			std::vector<float> m;
 			int lines = 0;
 			int columns = 0;
 			int size = 0;
 
 			MatrixND(int _lines, int _columns, std::vector<float> _m);
+			MatrixND(int _lines, int _columns);
 			~MatrixND() = default;
 
 			float Trace() const;
@@ -281,11 +283,33 @@ namespace Core
 			MatrixND MultiplyMatrix(const Matrix4x4& mat) const;
 			float Determinant() const;
 			MatrixND ExpandRight(const MatrixND& mat) const;
-			MatrixND Identity() const;
+			static MatrixND Identity(int lines, int columns);
+			static MatrixND Zero(int lines, int columns);
 			MatrixND Pivot() const;
 			MatrixND Inverse() const;
 
 			void Print() const;
+
+			bool operator==(const MatrixND& mPrime);
+			float operator[](int index);
+
+			MatrixND operator+(const MatrixND& mPrime);
+			MatrixND operator+(float x);
+			void operator+=(const MatrixND& mPrime);
+			void operator+=(float x);
+
+			MatrixND operator-(const MatrixND& mPrime);
+			MatrixND operator-(float x);
+			void operator-=(const MatrixND& mPrime);
+			void operator-=(float x);
+
+			MatrixND operator*(const MatrixND& mPrime);
+			MatrixND operator*(float x);
+			void operator*=(float x);
+
+			MatrixND operator/(float x);
+			MatrixND operator/(const MatrixND& mPrime);
+			void operator/=(float x);
 
 		private:
 			void RoundMatrix();
