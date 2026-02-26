@@ -13,9 +13,9 @@ namespace Core
 		class Matrix2x2
 		{
 		public:
-			float m[4] = { 
-				0.0f, 0.0f, 
-				0.0f, 0.0f 
+			float m[4] = {
+				0.0f, 0.0f,
+				0.0f, 0.0f
 			};
 
 			static const Matrix2x2 Identity;

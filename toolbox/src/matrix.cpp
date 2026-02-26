@@ -513,8 +513,6 @@ bool Matrix2x2::NearZero(float num) const
 
 #pragma endregion
 
-
-
 #pragma region Matrix3x3
 
 const Matrix3x3 Matrix3x3::Identity = {
