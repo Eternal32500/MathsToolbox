@@ -102,7 +102,7 @@ float Vector2D::Angle(const Vector2D& v) const
     if (IsEqualZero(norm) || IsEqualZero(vMagnitude))
         return 0.f;
 
-    return TO_DEGREES(std::acosf(DotProduct(v) / (norm * vMagnitude)));
+    return TO_DEGREES(std::acos(DotProduct(v) / (norm * vMagnitude)));
 }
 
 Vector2D Vector2D::Rotate(float angle) const
@@ -428,7 +428,7 @@ float Vector3D::Angle(const Vector3D& v) const
     if (IsEqualZero(norm) || IsEqualZero(vMagnitude))
         return 0.f;
 
-    return TO_DEGREES(std::acosf(DotProduct(v) / (norm * vMagnitude)));
+    return TO_DEGREES(std::acos(DotProduct(v) / (norm * vMagnitude)));
 }
 
 Vector3D Vector3D::GetSafeUpVector(Vector3D dir) 

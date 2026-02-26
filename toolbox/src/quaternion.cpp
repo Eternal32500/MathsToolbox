@@ -45,8 +45,8 @@ Quaternion Quaternion::Qmultiply(Quaternion q1, Quaternion q2)
 Quaternion Quaternion::Qrotation(Vector3D v, float angle)
 {
 	angle = angle * 0.5f * 3.1415927f / 180.f;
-	float sinA = sinf(angle);
-	return {v.x * sinA, v.y * sinA, v.z * sinA, std::cosf(angle)};
+	float sinA = sin(angle);
+	return {v.x * sinA, v.y * sinA, v.z * sinA, std::cos(angle)};
 }
 
 Quaternion Quaternion::Qconjugate(Quaternion q)
@@ -141,10 +141,10 @@ Quaternion Quaternion::Slerp(Quaternion q1, Quaternion q2, float t)
 		return result;
 	}
 
-	float omega = acosf(dot);
-	float sinOmega = sinf(omega);
-	float a = sinf((1.0f - t) * omega) / sinOmega;
-	float b = sinf(t * omega) / sinOmega;
+	float omega = acos(dot);
+	float sinOmega = sin(omega);
+	float a = sin((1.0f - t) * omega) / sinOmega;
+	float b = sin(t * omega) / sinOmega;
 
 	return q1 * a + q2 * b;
 }
