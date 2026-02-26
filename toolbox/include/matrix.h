@@ -148,43 +148,5 @@ namespace Core
 			void RoundMatrix();
 			bool NearZero(float num) const;
 		};
-
-		class MatrixND
-		{
-		public:
-			std::vector<float> m;
-			int lines = 0;
-			int columns = 0;
-			int size = 0;
-
-			MatrixND(int _lines, int _columns, std::vector<float> _m);
-			~MatrixND() = default;
-
-			VectorND Diagonal() const;
-			float Trace() const;
-			MatrixND Opposite() const;
-			MatrixND Transpose() const;
-			MatrixND AddMatrix(const MatrixND& mat) const;
-			MatrixND AddMatrix(const Matrix2x2& mat) const;
-			MatrixND AddMatrix(const Matrix3x3& mat) const;
-			MatrixND AddMatrix(const Matrix4x4& mat) const;
-			MatrixND MultiplyScalar(float f) const;
-			MatrixND MultiplyMatrix(const MatrixND& mat) const;
-			MatrixND MultiplyMatrix(const Matrix2x2& mat) const;
-			MatrixND MultiplyMatrix(const Matrix3x3& mat) const;
-			MatrixND MultiplyMatrix(const Matrix4x4& mat) const;
-			float Determinant() const;
-			MatrixND ExpandRight(const MatrixND& mat) const;
-			MatrixND Identity() const;
-			MatrixND Pivot() const;
-			MatrixND Inverse() const;
-
-			void Print() const;
-
-		private:
-			void RoundMatrix();
-			bool NearZero(float num) const;
-			MatrixND ReduceMatrix(int line, int column) const;
-		};
 	}
 }
