@@ -64,3 +64,11 @@ void EXPECT_MAT4_EQ(const Matrix4x4& myMat, const glm::mat4& glmMat)
     EXPECT_FLOAT_EQ(myMat.m[14], glmMat[3][2]);
     EXPECT_FLOAT_EQ(myMat.m[15], glmMat[3][3]);
 }
+
+void EXPECT_QUAT_EQ(const Quaternion& q1, const glm::quat& q2)
+{
+    EXPECT_FLOAT_EQ(q1.x, q2.x);
+    EXPECT_FLOAT_EQ(q1.y, q2.y);
+    EXPECT_FLOAT_EQ(q1.z, q2.z);
+    EXPECT_FLOAT_EQ(q1.w, q2.w);
+}

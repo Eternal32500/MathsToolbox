@@ -72,13 +72,10 @@ Quaternion Quaternion::Opposite()
 
 Vector3D Quaternion::RotateVector(const Vector3D& v) const
 {
-	Quaternion q = *this;
-	q.Normalize();
-
-	Vector3D qVec(q.x, q.y, q.z);
+	Vector3D qVec(x, y, z);
 
 	Vector3D t = qVec.CrossProduct(v) * 2.0f;
-	return v + t * q.w + qVec.CrossProduct(t);
+	return v + t * w + qVec.CrossProduct(t);
 }
 
 Quaternion Quaternion::FromAxisAngle(const Vector3D& axis, float angleDeg)
@@ -117,7 +114,7 @@ Quaternion Quaternion::Normalized()
 	return Vector4D(x, y, z, w).Normalized();
 }
 
-float Quaternion::Dot(const Quaternion& q)
+float Quaternion::Dot(const Quaternion& q) const
 {
 	return x * q.x + y * q.y + z * q.z + w * q.w;
 }
@@ -180,9 +177,6 @@ Quaternion Quaternion::Inverse() const
 
 Quaternion Quaternion::Slerp(Quaternion q1, Quaternion q2, float t)
 {
-	q1 = q1.Normalized();
-	q2 = q2.Normalized();
-
 	float dot = q1.Dot(q2);
 
 	dot = std::min(dot, 1.0f);
@@ -196,7 +190,6 @@ Quaternion Quaternion::Slerp(Quaternion q1, Quaternion q2, float t)
 
 	if (dot > 0.9995f) {
 		Quaternion result = Nlerp(q1, q2, t);
-		result.Normalize();
 		return result;
 	}
 
@@ -205,12 +198,13 @@ Quaternion Quaternion::Slerp(Quaternion q1, Quaternion q2, float t)
 	float a = sin((1.0f - t) * omega) / sinOmega;
 	float b = sin(t * omega) / sinOmega;
 
-	return q1 * a + q2 * b;
+	Quaternion result = q1 * a + q2 * b;
+	return result * result.Magnitude();
 }
 
 Quaternion Quaternion::Nlerp(Quaternion q1, Quaternion q2, float t)
 {
-	return (q1 * (1-t) + q2 * t).Normalized();
+	return (q1 * (1-t) + q2 * t);
 }
 
 #pragma region Operators
@@ -228,6 +222,11 @@ Quaternion Quaternion::operator-(const Quaternion& q) const
 Quaternion Quaternion::operator*(float f) const
 {
 	return Quaternion(x * f, y * f, z * f, w * f);
+}
+
+Quaternion Quaternion::operator-()
+{
+	return Opposite();
 }
 
 #pragma endregion

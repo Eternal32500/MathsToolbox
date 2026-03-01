@@ -21,7 +21,7 @@ namespace Core
 
 			void Normalize();
 			float Magnitude() const;
-			float Dot(const Quaternion& q2);
+			float Dot(const Quaternion& q2) const;
 			float Angle(Quaternion q);
 			Quaternion Opposite();
 			Quaternion Conjugate();
@@ -43,6 +43,8 @@ namespace Core
 			Quaternion operator+(const Quaternion& q) const;
 			Quaternion operator-(const Quaternion& q) const;
 			Quaternion operator*(float f) const;
+
+			Quaternion operator-();
 
 			static const Quaternion Identity;
 		};
