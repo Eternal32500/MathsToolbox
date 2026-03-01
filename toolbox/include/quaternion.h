@@ -14,31 +14,37 @@ namespace Core
 			float x;
 			float y;
 			float z;
+
 			Quaternion();
 			Quaternion(float _x, float _y, float _z, float _w);
-			static Quaternion Qadd(Quaternion q1, Quaternion q2);
-			static Quaternion Qmultiply(Quaternion q1, float f);
-			static Quaternion Qmultiply(Quaternion q1, Quaternion q2);
-			static Quaternion Qrotation(Vector3D v, float angle);
-			static Quaternion Qconjugate(Quaternion q);
-			static Quaternion Qopposite(Quaternion q);
-			Vector3D RotateVector(const Vector3D& v) const;
-			static Quaternion FromAxisAngle(const Vector3D& axis, float angleDeg);
-		
+			Quaternion(const Vector4D& v);
+
 			void Normalize();
-			static Quaternion Normalize(Quaternion q);
-			static float Dot(const Quaternion& q1, const Quaternion& q2);
+			float Magnitude() const;
+			float Dot(const Quaternion& q2);
+			float Angle(Quaternion q);
+			Quaternion Opposite();
+			Quaternion Conjugate();
+			Quaternion Normalized();
+			Quaternion Inverse() const;
 
+			Quaternion Add(Quaternion q);
+			Quaternion Multiply(float f);
+			Quaternion Multiply(Quaternion q2);
+			Vector3D RotateVector(const Vector3D& v) const;
+
+			static Quaternion Qrotation(Vector3D v, float angle);
+			static Quaternion FromAxisAngle(const Vector3D& axis, float angleDeg);
 			static Matrix3x3 ToMatrixRot(Quaternion q);
-
+			static Quaternion FromEuler(const Vector3D& eulerDeg);
 			static Quaternion Slerp(Quaternion q1, Quaternion q2, float t);
 			static Quaternion Nlerp(Quaternion q1, Quaternion q2, float t);
 
-			Quaternion operator+(const Quaternion& q);
-			Quaternion operator-(const Quaternion& q);
-			Quaternion operator*(float f);
-			Quaternion operator*(Quaternion& q);
-		private:
+			Quaternion operator+(const Quaternion& q) const;
+			Quaternion operator-(const Quaternion& q) const;
+			Quaternion operator*(float f) const;
+
+			static const Quaternion Identity;
 		};
 	}
 }
