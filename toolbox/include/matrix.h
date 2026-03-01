@@ -33,19 +33,21 @@ namespace Core
 			Vector2D Diagonal() const;
 			Matrix2x2 Opposite() const;
 			Matrix2x2 Transposite() const;
+			Matrix2x2 Inverse() const;
+
 			Matrix2x2 AddMatrix(const Matrix2x2& mat) const;
 			Matrix2x2 AddMatrix(const MatrixND& mat) const;
 			Matrix2x2 MultiplyScalar(float f) const;
 			Matrix2x2 MultiplyMatrix(const Matrix2x2& mat) const;
 			MatrixND MultiplyMatrix(const MatrixND& mat) const;
-			Vector2D MultriplyVector2D(const Vector2D& vec) const;
+			Vector2D MultiplyVector2D(const Vector2D& vec) const;
+			
+			static Matrix2x2 ScaleMatrix(float x, float y);
+			static Matrix2x2 ScaleMatrix(const Vector2D& v);
+			static Matrix2x2 RotateMatrix(float angle);
+			
 			MatrixND ExpandRight(const Matrix2x2& mat) const;
 			MatrixND ExpandRight(const MatrixND& mat) const;
-			Matrix2x2 Pivot() const;
-			Matrix2x2 Inverse() const;
-			Matrix3x3 Translate(Vector3D p);
-			Matrix2x2 Rotate2DOrigin(float angle) const;
-			Matrix3x3 Rotate2DPoint(float angle, Vector2D p);
 
 			void Print() const;
 
@@ -80,9 +82,10 @@ namespace Core
 			void operator/=(float);
 			void operator/=(const Matrix2x2&);
 
+			Matrix2x2 operator-();
+
 		private:
 			void RoundMatrix();
-			bool NearZero(float num) const;
 		};
 
 		class Matrix3x3
@@ -109,25 +112,30 @@ namespace Core
 
 			~Matrix3x3() = default;
 
-			Vector3D Diagonal() const;
 			float Trace() const;
+			float Determinant() const;
+			Vector3D Diagonal() const;
 			Matrix3x3 Opposite() const;
 			Matrix3x3 Transposite() const;
+			Matrix3x3 Inverse() const;
+
 			Matrix3x3 AddMatrix(const Matrix3x3& mat) const;
 			Matrix3x3 AddMatrix(const MatrixND& mat) const;
 			Matrix3x3 MultiplyScalar(float f) const;
 			Matrix3x3 MultiplyMatrix(const Matrix3x3& mat) const;
 			MatrixND MultiplyMatrix(const MatrixND& mat) const;
 			Vector3D MultiplyVector3D(const Vector3D& vec) const;
-			float Determinant() const;
 			MatrixND ExpandRight(const Matrix3x3& mat) const;
 			MatrixND ExpandRight(const MatrixND& mat) const;
-			Matrix3x3 Pivot() const;
-			Matrix3x3 Inverse() const;
-			Matrix4x4 Translate(Vector3D p) const;
-			Matrix3x3 Rotate3DOrigin(float x, float y, float z) const;
-			Matrix4x4 Rotate3DPoint(Vector3D p, Vector3D axis, float angle);
-			static Matrix3x3 CreateRotation3DMatrix(const Vector3D& rotation);
+
+			static Matrix4x4 TranslateMatrix(const Vector3D& p);
+			static Matrix3x3 RotationMatrixEuler(const Vector3D& rotation);
+			static Matrix3x3 RotationMatrixEuler(float x, float y, float z);
+			static Matrix3x3 RotationXMatrix(float alpha);
+			static Matrix3x3 RotationYMatrix(float alpha);
+			static Matrix3x3 RotationZMatrix(float alpha);
+			static Matrix3x3 ScaleMatrix(const Vector3D& s);
+			static Matrix3x3 ScaleMatrix(float sx, float sy, float sz);
 
 			void Print() const;
 
@@ -161,15 +169,10 @@ namespace Core
 			void operator/=(float);
 			void operator/=(const Matrix3x3&);
 
+			Matrix3x3 operator-();
+
 		private:
 			void RoundMatrix();
-			bool NearZero(float num) const;
-			Matrix3x3 Rotate3DXOrigin(float angle) const;
-			Matrix3x3 Rotate3DYOrigin(float angle) const;
-			Matrix3x3 Rotate3DZOrigin(float angle) const;
-			static Matrix3x3 CreateRotationXMatrix(float alpha);
-			static Matrix3x3 CreateRotationYMatrix(float alpha);
-			static Matrix3x3 CreateRotationZMatrix(float alpha);
 		};
 
 		class Matrix4x4
@@ -191,33 +194,38 @@ namespace Core
 			Matrix4x4(float components);
 			Matrix4x4(const Matrix3x3&);
 
-			Vector4D Diagonal() const;
 			float Trace() const;
+			float Determinant() const;
+			Vector4D Diagonal() const;
 			Matrix4x4 Opposite() const;
 			Matrix4x4 Transposite() const;
+			Matrix4x4 Inverse() const;
+
 			Matrix4x4 AddMatrix(const Matrix4x4& mat) const;
 			Matrix4x4 AddMatrix(const MatrixND& mat) const;
 			Matrix4x4 MultiplyScalar(float f) const;
 			Matrix4x4 MultiplyMatrix(const Matrix4x4& mat) const;
 			MatrixND MultiplyMatrix(const MatrixND& mat) const;
 			Vector4D MultiplyVector4D(const Vector4D& vec) const;
-			float Determinant() const;
 			MatrixND ExpandRight(const Matrix4x4& mat) const;
 			MatrixND ExpandRight(const MatrixND& mat) const;
-			Matrix4x4 Pivot() const;
-			Matrix4x4 Inverse() const;
-			Matrix4x4 Translate(Vector3D p) const;
-			static Matrix4x4 TRS(const Vector3D& position, const Vector3D& rotation, const Vector3D& scale);
-			static Matrix4x4 Perspective(float FOV, float aspect, float zNear, float zFar);
+
 			static Matrix4x4 Orthographic(float left, float right, float bottom, float top, float zNear, float zFar);
 			static Matrix4x4 LookAt(Vector3D position, Vector3D target, Vector3D up);
+			static Matrix4x4 Perspective(float FOV, float aspect, float zNear, float zFar);
 
-			static Matrix4x4 CreateTranslationMatrix(const Vector3D& translation);
-			static Matrix4x4 CreateScaleMatrix(const Vector3D& scale);
-			static Matrix4x4 CreateXRotationMatrix(float angle);
-			static Matrix4x4 CreateYRotationMatrix(float angle);
-			static Matrix4x4 CreateZRotationMatrix(float angle);
-			static Matrix4x4 CreateRotationMatrix(const Vector3D& rotation);
+			static Matrix4x4 TRS(const Vector3D& position, const Vector3D& rotation, const Vector3D& scale);
+
+			static Matrix4x4 TranslateMatrix(Vector3D p);
+
+			static Matrix4x4 RotationXMatrix(float angle);
+			static Matrix4x4 RotationYMatrix(float angle);
+			static Matrix4x4 RotationZMatrix(float angle);
+			static Matrix4x4 RotationMatrixEuler(const Vector3D& rotation);
+			static Matrix4x4 RotationMatrixEuler(float x, float y, float z);
+			
+			static Matrix4x4 ScaleMatrix(const Vector3D& scale);
+			static Matrix4x4 ScaleMatrix(float x, float y, float z);
 
 			void Print() const;
 
@@ -251,9 +259,10 @@ namespace Core
 			void operator/=(float);
 			void operator/=(const Matrix4x4&);
 
+			Matrix4x4 operator-();
+
 		private:
 			void RoundMatrix();
-			bool NearZero(float num) const;
 		};
 
 		class MatrixND
@@ -313,7 +322,6 @@ namespace Core
 
 		private:
 			void RoundMatrix();
-			bool NearZero(float num) const;
 			MatrixND ReduceMatrix(int line, int column) const;
 		};
 	}

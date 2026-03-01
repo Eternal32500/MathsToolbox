@@ -5,7 +5,7 @@
 using namespace Core::Maths;
 #pragma region Matrix2x2
 
-const Matrix2x2 Matrix2x2::Identity = Matrix2x2(1.0f, 0.0f, 1.0f, 0.0f);
+const Matrix2x2 Matrix2x2::Identity = Matrix2x2(1.0f, 0.0f, 0.0f, 1.0f);
 const Matrix2x2 Matrix2x2::Zero = Matrix2x2(0.0f, 0.0f, 0.0f, 0.0f);
 
 Matrix2x2::Matrix2x2()
@@ -87,10 +87,8 @@ Matrix2x2 Matrix2x2::Opposite() const
 
 Matrix2x2 Matrix2x2::Transposite() const
 {
-    return {
-        m[0], m[2],
-        m[1], m[3]
-    };
+    return Matrix2x2(m[0], m[2],
+        m[1], m[3]);
 }
 
 Matrix2x2 Matrix2x2::AddMatrix(const Matrix2x2& mat) const
@@ -123,10 +121,10 @@ Matrix2x2 Matrix2x2::MultiplyScalar(float f) const
 Matrix2x2 Matrix2x2::MultiplyMatrix(const Matrix2x2& mat) const
 {
     return {
-         m[0] * mat.m[0] + m[1] * mat.m[2],
-         m[0] * mat.m[1] + m[1] * mat.m[3],
-         m[2] * mat.m[0] + m[3] * mat.m[2],
-         m[2] * mat.m[1] + m[3] * mat.m[3]
+         m[0] * mat.m[0] + m[2] * mat.m[1],
+         m[1] * mat.m[0] + m[3] * mat.m[1],
+         m[0] * mat.m[2] + m[2] * mat.m[3],
+         m[1] * mat.m[2] + m[3] * mat.m[3]
     }; 
 }
 
@@ -151,11 +149,11 @@ MatrixND Matrix2x2::MultiplyMatrix(const MatrixND& mat) const
     return MatrixND(2, mat.columns, _m);
 }
 
-Vector2D Matrix2x2::MultriplyVector2D(const Vector2D& vec) const
+Vector2D Matrix2x2::MultiplyVector2D(const Vector2D& vec) const
 {
     return {
-        m[0] * vec.x + m[1] * vec.y,
-        m[2] * vec.x + m[3] * vec.y
+        m[0] * vec.x + m[2] * vec.y,
+        m[1] * vec.x + m[3] * vec.y
     };
 }
 
@@ -193,92 +191,50 @@ MatrixND Matrix2x2::ExpandRight(const MatrixND& mat) const
     return MatrixND(2, 2 + mat.columns, _m);
 }
 
-Matrix2x2 Matrix2x2::Pivot() const
-{
-    float _m[4] = {
-        m[0], m[1],
-        m[2], m[3]
-    };
-
-    int r = -1;
-    for (int j = 0; j < 2; ++j)
-    {
-        int k = j;
-
-        for (int i = j; i < 2; ++i)
-            if (std::abs(_m[i * 2 + j]) > std::abs(_m[k * 2 + j]))
-                k = i;
-
-        if (IsEqualZero(_m[k * 2 + j]))
-            continue;
-
-        ++r;
-
-        if (k != r)
-            for (int i = 0; i < 2; ++i)
-                std::swap(_m[r * 2 + i], _m[k * 2 + i]);
-
-        float pivot = _m[r * 2 + j];
-        if (!IsEqualZero(pivot))
-            for (int i = 0; i < 2; ++i)
-                _m[r * 2 + i] /= pivot;
-
-        for (int i = 0; i < 2; ++i)
-        {
-            if (i != r)
-            {
-                float factor = _m[i * 2 + j];
-                for (int l = 0; l < 2; ++l)
-                    _m[i * 2 + l] -= factor * _m[r * 2 + l];
-            }
-        }
-    }
-
-    return Matrix2x2(_m);
-}
-
 Matrix2x2 Matrix2x2::Inverse() const
 {
-    if (IsEqualZero(Determinant()))
+    float det = Determinant();
+
+    if (IsEqualZero(det))
         return Matrix2x2::Zero;
 
-    MatrixND mat(2, 4, ExpandRight(Matrix2x2::Identity).m);
-    mat = mat.Pivot();
+    float invDet = 1.f / det;
 
-    return {
-        mat.m[2], mat.m[3],
-        mat.m[6], mat.m[7]
-    };;
+    return Matrix2x2(
+        m[3] * invDet,
+        -m[1] * invDet,
+        -m[2] * invDet,
+        m[0] * invDet
+    );
 }
 
-Matrix3x3 Matrix2x2::Translate(Vector3D p)
+Matrix2x2 Matrix2x2::ScaleMatrix(float x, float y)
 {
     return {
-        1.f, 0.f, p.x,
-        0.f, 1.f, p.y,
-        0.f, 0.f, 1.f
+        x, 0.f,
+        0.f, y
     };
 }
 
-Matrix2x2 Matrix2x2::Rotate2DOrigin(float angle) const
+Matrix2x2 Matrix2x2::ScaleMatrix(const Vector2D& v)
 {
-   
-
     return {
-        std::cos(angle), -std::sin(angle),
-        std::sin(angle),   std::cos(angle)
+        v.x, 0.f,
+        0.f, v.y
     };
 }
 
-Matrix3x3 Matrix2x2::Rotate2DPoint(float angle, Vector2D p)
+Matrix2x2 Matrix2x2::RotateMatrix(float angle)
 {
     angle = TO_RADIANS(angle);
 
-    return {
-        std::cos(angle), -std::sin(angle), p.x * (1 - std::cos(angle)) + p.y * std::sin(angle),
-        std::sin(angle),   std::cos(angle),  p.y * (1 - std::cos(angle)) - p.x * std::sin(angle),
-             0.f,               0.f,                             1.f
-    };;
+    float c = std::cos(angle);
+    float s = std::sin(angle);
+
+    return Matrix2x2(
+        c, s, 
+        -s, c
+    );
 }
 
 void Matrix2x2::Print() const
@@ -289,7 +245,7 @@ void Matrix2x2::Print() const
 
 Vector2D Matrix2x2::operator*(Vector2D& v)
 {
-    return MultriplyVector2D(v);
+    return MultiplyVector2D(v);
 }
 
 bool  Matrix2x2::operator==(const Matrix2x2& mPrime)
@@ -426,7 +382,7 @@ MatrixND Matrix2x2::operator*(const MatrixND& mPrime)
 
 Vector2D Matrix2x2::operator*(const Vector2D& v)
 {
-    return MultriplyVector2D(v);
+    return MultiplyVector2D(v);
 }
 
 Matrix2x2 Matrix2x2::operator*(float x)
@@ -463,13 +419,7 @@ void Matrix2x2::operator/=(float x)
 
 void Matrix2x2::operator/=(const Matrix2x2& mPrime)
 {
-    if (IsEqualZero(mPrime.m[0]) || IsEqualZero(mPrime.m[1]) || IsEqualZero(mPrime.m[2]) || IsEqualZero(mPrime.m[3]))
-        return;
-
-    m[0] /= mPrime.m[0];
-    m[1] /= mPrime.m[1];
-    m[2] /= mPrime.m[2];
-    m[3] /= mPrime.m[3];
+    *this = *this * mPrime.Inverse();
 }
 
 Matrix2x2 Matrix2x2::operator/(float x)
@@ -485,31 +435,21 @@ Matrix2x2 Matrix2x2::operator/(float x)
 
 Matrix2x2 Matrix2x2::operator/(const Matrix2x2& mPrime)
 {
-    if (IsEqualZero(mPrime.m[0]) || IsEqualZero(mPrime.m[1]) || IsEqualZero(mPrime.m[2]) || IsEqualZero(mPrime.m[3]))
-        return Matrix2x2::Zero;
+    return *this * mPrime.Inverse();
+}
 
-    return {
-        m[0] / mPrime.m[0], m[1] / mPrime.m[1],
-        m[2] / mPrime.m[2], m[3] / mPrime.m[3]
-    };
+Matrix2x2 Matrix2x2::operator-()
+{
+    return Opposite();
 }
 
 void Matrix2x2::RoundMatrix()
 {
-    if (NearZero(m[0])) m[0] = 0.f;
-    if (NearZero(m[1])) m[1] = 0.f;
-    if (NearZero(m[2])) m[2] = 0.f;
-    if (NearZero(m[3])) m[3] = 0.f;
+    if (IsEqualZero(m[0])) m[0] = 0.f;
+    if (IsEqualZero(m[1])) m[1] = 0.f;
+    if (IsEqualZero(m[2])) m[2] = 0.f;
+    if (IsEqualZero(m[3])) m[3] = 0.f;
 }
-
-bool Matrix2x2::NearZero(float num) const
-{
-    if (std::fabs(num) < 0.00001f)
-        return true;
-    else
-        return false;
-}
-
 
 #pragma endregion
 
@@ -695,17 +635,17 @@ Matrix3x3 Matrix3x3::MultiplyScalar(float f) const
 Matrix3x3 Matrix3x3::MultiplyMatrix(const Matrix3x3& mat) const
 {
     return {
-        m[0] * mat.m[0] + m[1] * mat.m[3] + m[2] * mat.m[6],
-        m[0] * mat.m[1] + m[1] * mat.m[4] + m[2] * mat.m[7],
-        m[0] * mat.m[2] + m[1] * mat.m[5] + m[2] * mat.m[8],
+        m[0] * mat.m[0] + m[3] * mat.m[1] + m[6] * mat.m[2],
+        m[1] * mat.m[0] + m[4] * mat.m[1] + m[7] * mat.m[2],
+        m[2] * mat.m[0] + m[5] * mat.m[1] + m[8] * mat.m[2],
 
-        m[3] * mat.m[0] + m[4] * mat.m[3] + m[5] * mat.m[6],
-        m[3] * mat.m[1] + m[4] * mat.m[4] + m[5] * mat.m[7],
-        m[3] * mat.m[2] + m[4] * mat.m[5] + m[5] * mat.m[8],
+        m[0] * mat.m[3] + m[3] * mat.m[4] + m[6] * mat.m[5],
+        m[1] * mat.m[3] + m[4] * mat.m[4] + m[7] * mat.m[5],
+        m[2] * mat.m[3] + m[5] * mat.m[4] + m[8] * mat.m[5],
 
-        m[6] * mat.m[0] + m[7] * mat.m[3] + m[8] * mat.m[6],
-        m[6] * mat.m[1] + m[7] * mat.m[4] + m[8] * mat.m[7],
-        m[6] * mat.m[2] + m[7] * mat.m[5] + m[8] * mat.m[8]
+        m[0] * mat.m[6] + m[3] * mat.m[7] + m[6] * mat.m[8],
+        m[1] * mat.m[6] + m[4] * mat.m[7] + m[7] * mat.m[8],
+        m[2] * mat.m[6] + m[5] * mat.m[7] + m[8] * mat.m[8]
     };
 }
 
@@ -731,18 +671,11 @@ MatrixND Matrix3x3::MultiplyMatrix(const MatrixND& mat) const
 
 Vector3D Matrix3x3::MultiplyVector3D(const Vector3D& vec) const
 {
-    float _m[3] = {
-        0.f, 0.f, 0.f
+    return {
+        m[0] * vec.x + m[3] * vec.y + m[6] * vec.z,
+        m[1] * vec.x + m[4] * vec.y + m[7] * vec.z,
+        m[2] * vec.x + m[5] * vec.y + m[8] * vec.z
     };
-
-    for (int i = 0; i < 3; ++i)
-    {
-        for (int j = 0; j < 3; ++j)
-        {
-            _m[i] += m[i * 3 + j] * vec[j];
-        }
-    }
-    return Vector3D(_m[0], _m[1], _m[2]);
 }
 
 float Matrix3x3::Determinant() const
@@ -787,201 +720,166 @@ MatrixND Matrix3x3::ExpandRight(const MatrixND& mat) const
     return MatrixND(3, 3 + mat.columns, _m);
 }
 
-Matrix3x3 Matrix3x3::Pivot() const
-{
-    float _m[9] = {
-        m[0], m[1], m[2],
-        m[3], m[4], m[5],
-        m[6], m[7], m[8]
-    };
-
-    int r = -1;
-    for (int j = 0; j < 3; ++j)
-    {
-        int k = j;
-
-        for (int i = j; i < 3; ++i)
-            if (std::abs(_m[i * 3 + j]) > std::abs(_m[k * 3 + j]))
-                k = i;
-
-        if (IsEqualZero(_m[k * 3 + j]))
-            continue;
-
-        ++r;
-
-        if (k != r)
-            for (int i = 0; i < 3; ++i)
-                std::swap(_m[r * 3 + i], _m[k * 3 + i]);
-
-        float pivot = _m[r * 3 + j];
-        if (!IsEqualZero(pivot))
-            for (int i = 0; i < 3; ++i)
-                _m[r * 3 + i] /= pivot;
-
-        for (int i = 0; i < 3; ++i)
-        {
-            if (i != r)
-            {
-                float factor = _m[i * 3 + j];
-                for (int l = 0; l < 3; ++l)
-                    _m[i * 3 + l] -= factor * _m[r * 3 + l];
-            }
-        }
-    }
-
-    return Matrix3x3(_m);
-}
-
 Matrix3x3 Matrix3x3::Inverse() const
 {
-    if (IsEqualZero(Determinant()))
-        return *this;
+    float det = Determinant();
 
-    MatrixND mat(3, 6, ExpandRight(Matrix3x3::Identity).m);
-    mat = mat.Pivot();
+    if (IsEqualZero(det))
+        return Matrix3x3::Zero;
 
-    return {
-        mat.m[3],  mat.m[4],  mat.m[5],
-        mat.m[9],  mat.m[10], mat.m[11],
-        mat.m[15], mat.m[16], mat.m[17]
-    };
+    float invDet = 1.0f / det;
+
+    return Matrix3x3(
+        (m[4] * m[8] - m[5] * m[7]) * invDet,
+        -(m[1] * m[8] - m[2] * m[7]) * invDet,
+        (m[1] * m[5] - m[2] * m[4]) * invDet,
+
+        -(m[3] * m[8] - m[5] * m[6]) * invDet,
+        (m[0] * m[8] - m[2] * m[6]) * invDet,
+        -(m[0] * m[5] - m[2] * m[3]) * invDet,
+
+        (m[3] * m[7] - m[4] * m[6]) * invDet,
+        -(m[0] * m[7] - m[1] * m[6]) * invDet,
+        (m[0] * m[4] - m[1] * m[3]) * invDet
+    );
 }
 
-Matrix4x4 Matrix3x3::Translate(Vector3D p) const
+Matrix4x4 Matrix3x3::TranslateMatrix(const Vector3D& p)
 {
     return {
-        1.f, 0.f, 0.f, p.x,
-        0.f, 1.f, 0.f, p.y,
-        0.f, 0.f, 1.f, p.z,
-        0.f, 0.f, 0.f, 1.f
+        1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        p.x, p.y, p.z, 1.f
     };
 }
 
-Matrix3x3 Matrix3x3::Rotate3DOrigin(float x, float y, float z) const
-{
-    Matrix3x3 mat = Matrix3x3::Identity;
+//Matrix4x4 Matrix3x3::RotateMatrixPoint(Vector3D p, Vector3D axis, float angle)
+//{
+//    angle *= PI / 180.0f;
+//    float cosA = cos(angle);
+//    float sinA = sin(angle);
+//    axis = axis.Normalized();
+//
+//    float _m[16] = {
+//        cosA + axis.x * axis.x * (1.f - cosA),
+//        axis.x * axis.y * (1.f - cosA) - axis.z * sinA,
+//        axis.x * axis.z * (1.f - cosA) + axis.y * sinA,
+//        0.f,
+//
+//        axis.y * axis.x * (1.f - cosA) + axis.z * sinA,
+//        cosA + axis.y * axis.y * (1.f - cosA),
+//        axis.y * axis.z * (1.f - cosA) - axis.x * sinA,
+//        0.f,
+//
+//        axis.z * axis.x * (1.f - cosA) - axis.y * sinA,
+//        axis.z * axis.y * (1.f - cosA) + axis.x * sinA,
+//        cosA + axis.z * axis.z * (1.f - cosA),
+//        0.f,
+//
+//        0.f, 0.f, 0.f, 1.f
+//    };
+//
+//    Matrix4x4 rotation(_m);
+//
+//    Matrix4x4 transOpposite = Matrix4x4::Identity.Translate(p.Opposite());
+//    Matrix4x4 transBack = Matrix4x4::Identity.Translate(p);
+//
+//    return transBack.MultiplyMatrix(rotation).MultiplyMatrix(transOpposite);
+//}
 
-    float radConvert = PI / 180.f;
-    x *= radConvert;
-    y *= radConvert;
-    z *= radConvert;
-
-    if (!NearZero(z))
-        mat = mat.MultiplyMatrix(Rotate3DZOrigin(z));
-    if (!NearZero(y))
-        mat = mat.MultiplyMatrix(Rotate3DYOrigin(y));
-    if (!NearZero(x))
-        mat = mat.MultiplyMatrix(Rotate3DXOrigin(x));
-
-    return mat;
-}
-
-Matrix4x4 Matrix3x3::Rotate3DPoint(Vector3D p, Vector3D axis, float angle)
-{
-    angle *= PI / 180.0f;
-    float cosA = cos(angle);
-    float sinA = sin(angle);
-    axis = axis.Normalized();
-
-    float _m[16] = {
-        cosA + axis.x * axis.x * (1.f - cosA),
-        axis.x * axis.y * (1.f - cosA) - axis.z * sinA,
-        axis.x * axis.z * (1.f - cosA) + axis.y * sinA,
-        0.f,
-
-        axis.y * axis.x * (1.f - cosA) + axis.z * sinA,
-        cosA + axis.y * axis.y * (1.f - cosA),
-        axis.y * axis.z * (1.f - cosA) - axis.x * sinA,
-        0.f,
-
-        axis.z * axis.x * (1.f - cosA) - axis.y * sinA,
-        axis.z * axis.y * (1.f - cosA) + axis.x * sinA,
-        cosA + axis.z * axis.z * (1.f - cosA),
-        0.f,
-
-        0.f, 0.f, 0.f, 1.f
-    };
-
-    Matrix4x4 rotation(_m);
-
-    Matrix4x4 transOpposite = Matrix4x4::Identity.Translate(p.Opposite());
-    Matrix4x4 transBack = Matrix4x4::Identity.Translate(p);
-
-    return transBack.MultiplyMatrix(rotation).MultiplyMatrix(transOpposite);
-}
-
-Matrix3x3 Matrix3x3::Rotate3DXOrigin(float angle) const
-{
-    float cosA = std::cos(angle);
-    float sinA = std::sin(angle);
-
-    return {
-        1.f, 0.f,  0.f,
-        0.f, cosA, -sinA,
-        0.f, sinA, cosA
-    };
-}
-
-Matrix3x3 Matrix3x3::Rotate3DYOrigin(float angle) const
-{
-    float cosA = std::cos(angle);
-    float sinA = std::sin(angle);
-
-    return {
-        cosA,  0.f, sinA,
-        0.f,   1.f, 0.f,
-        -sinA, 0.f, cosA
-    };
-}
-
-Matrix3x3 Matrix3x3::Rotate3DZOrigin(float angle) const
-{
-    float cosA = std::cos(angle);
-    float sinA = std::sin(angle);
-
-    return {
-        cosA, -sinA, 0.f,
-        sinA, cosA,  0.f,
-        0.f,  0.f,   1.f
-    };
-}
-
-Matrix3x3 Matrix3x3::CreateRotationXMatrix(float alpha)
+Matrix3x3 Matrix3x3::RotationXMatrix(float alpha)
 {
     alpha = TO_RADIANS(alpha);
+
+    float c = cos(alpha);
+    float s = sin(alpha);
 
     return {
         1, 0, 0,
-        0, cos(alpha), -sin(alpha),
-        0, sin(alpha), cos(alpha)
+        0, c, s,
+        0, -s, c
     };
 }
 
-Matrix3x3 Matrix3x3::CreateRotationYMatrix(float alpha)
+Matrix3x3 Matrix3x3::RotationYMatrix(float alpha)
 {
     alpha = TO_RADIANS(alpha);
 
+    float c = cos(alpha);
+    float s = sin(alpha);
+
     return {
-        cos(alpha), 0, sin(alpha),
+        c, 0, -s,
         0, 1, 0,
-        -sin(alpha), 0, cos(alpha)
+        s, 0, c
     };
 }
 
-Matrix3x3 Matrix3x3::CreateRotationZMatrix(float alpha)
+Matrix3x3 Matrix3x3::RotationZMatrix(float alpha)
 {
     alpha = TO_RADIANS(alpha);
 
+    float c = cos(alpha);
+    float s = sin(alpha);
+
     return {
-        cos(alpha), -sin(alpha), 0,
-        sin(alpha), cos(alpha), 0,
+        c, s, 0,
+        -s, c, 0,
         0, 0, 1
     };
 }
 
-Matrix3x3 Matrix3x3::CreateRotation3DMatrix(const Vector3D& rotation)
+Matrix3x3 Matrix3x3::RotationMatrixEuler(const Vector3D& rotation)
 {
-    return CreateRotationZMatrix(rotation.z) * CreateRotationYMatrix(rotation.y) * CreateRotationXMatrix(rotation.x);
+    float ax = TO_RADIANS(rotation.x);
+    float ay = TO_RADIANS(rotation.y);
+    float az = TO_RADIANS(rotation.z);
+
+    float cx = cos(ax), sx = sin(ax);
+    float cy = cos(ay), sy = sin(ay);
+    float cz = cos(az), sz = sin(az);
+
+    return {
+        cy * cz,   cz * sx * sy + cx * sz,   cx * cz * sy + sx * sz,
+        -cy * sz,   cx * cz - sx * sy * sz,  -cz * sx + cx * sy * sz,
+        sy,       -cy * sx,                  cx * cy
+    };
+}
+
+Matrix3x3 Matrix3x3::RotationMatrixEuler(float x, float y, float z)
+{
+    float ax = TO_RADIANS(x);
+    float ay = TO_RADIANS(y);
+    float az = TO_RADIANS(z);
+
+    float cx = cos(ax), sx = sin(ax);
+    float cy = cos(ay), sy = sin(ay);
+    float cz = cos(az), sz = sin(az);
+
+    return {
+        cy * cz,   cz * sx * sy + cx * sz,   cx * cz * sy + sx * sz,
+        -cy * sz,   cx * cz - sx * sy * sz,  -cz * sx + cx * sy * sz,
+        sy,       -cy * sx,                  cx * cy
+    };
+}
+
+Matrix3x3 Matrix3x3::ScaleMatrix(const Vector3D& s)
+{
+    return {
+        s.x,  0.f,  0.f,
+        0.f,  s.y,  0.f,
+        0.f,  0.f,  s.z
+    };
+}
+
+Matrix3x3 Matrix3x3::ScaleMatrix(float sx, float sy, float sz)
+{
+    return {
+        sx,  0.f,  0.f,
+        0.f,  sy,  0.f,
+        0.f,  0.f,  sz
+    };
 }
 
 void Matrix3x3::Print() const
@@ -1202,16 +1100,7 @@ Matrix3x3 Matrix3x3::operator/(float x)
 
 Matrix3x3 Matrix3x3::operator/(const Matrix3x3& mP)
 {
-    if (IsEqualZero(mP.m[0]) || IsEqualZero(mP.m[1]) || IsEqualZero(mP.m[2]) || 
-        IsEqualZero(mP.m[3]) || IsEqualZero(mP.m[4]) || IsEqualZero(mP.m[5]) || 
-        IsEqualZero(mP.m[6]) || IsEqualZero(mP.m[7]) || IsEqualZero(mP.m[8]))
-        return Matrix3x3::Zero;
-    
-    return {
-        m[0] / mP.m[0], m[1] / mP.m[1], m[2] / mP.m[2],
-        m[3] / mP.m[3], m[4] / mP.m[4], m[5] / mP.m[5],
-        m[6] / mP.m[6], m[7] / mP.m[7], m[8] / mP.m[8]
-    };
+    return *this * mP.Inverse();
 }
 
 void Matrix3x3::operator/=(float x)
@@ -1232,42 +1121,27 @@ void Matrix3x3::operator/=(float x)
 
 void Matrix3x3::operator/=(const Matrix3x3& mPrime)
 {
-    if (IsEqualZero(mPrime.m[0]) || IsEqualZero(mPrime.m[1]) || IsEqualZero(mPrime.m[2]) ||
-        IsEqualZero(mPrime.m[3]) || IsEqualZero(mPrime.m[4]) || IsEqualZero(mPrime.m[5]) ||
-        IsEqualZero(mPrime.m[6]) || IsEqualZero(mPrime.m[7]) || IsEqualZero(mPrime.m[8]))
-        return;
+    *this =  *this * mPrime.Inverse();
+}
 
-    m[0] /= mPrime.m[0];
-    m[1] /= mPrime.m[1];
-    m[2] /= mPrime.m[2];
-    m[3] /= mPrime.m[3];
-    m[4] /= mPrime.m[4];
-    m[5] /= mPrime.m[5];
-    m[6] /= mPrime.m[6];
-    m[7] /= mPrime.m[7];
-    m[8] /= mPrime.m[8];
+Matrix3x3 Matrix3x3::operator-()
+{
+    return Opposite();
 }
 
 void Matrix3x3::RoundMatrix()
 {
-    if (NearZero(m[0])) m[0] = 0.f;
-    if (NearZero(m[1])) m[1] = 0.f;
-    if (NearZero(m[2])) m[2] = 0.f;
-    if (NearZero(m[3])) m[3] = 0.f;
-    if (NearZero(m[4])) m[4] = 0.f;
-    if (NearZero(m[5])) m[5] = 0.f;
-    if (NearZero(m[6])) m[6] = 0.f;
-    if (NearZero(m[7])) m[7] = 0.f;
-    if (NearZero(m[8])) m[8] = 0.f;
+    if (IsEqualZero(m[0])) m[0] = 0.f;
+    if (IsEqualZero(m[1])) m[1] = 0.f;
+    if (IsEqualZero(m[2])) m[2] = 0.f;
+    if (IsEqualZero(m[3])) m[3] = 0.f;
+    if (IsEqualZero(m[4])) m[4] = 0.f;
+    if (IsEqualZero(m[5])) m[5] = 0.f;
+    if (IsEqualZero(m[6])) m[6] = 0.f;
+    if (IsEqualZero(m[7])) m[7] = 0.f;
+    if (IsEqualZero(m[8])) m[8] = 0.f;
 }
 
-bool Matrix3x3::NearZero(float num) const
-{
-    if (std::fabs(num) < 0.00001f)
-        return true;
-    else
-        return false;
-}
 #pragma endregion
 
 #pragma region Matrix4x4
@@ -1534,20 +1408,14 @@ MatrixND Matrix4x4::MultiplyMatrix(const MatrixND& mat) const
     return MatrixND(4, mat.columns, _m);
 }
 
-Vector4D Matrix4x4::MultiplyVector4D(const Vector4D& vec) const
+Vector4D Matrix4x4::MultiplyVector4D(const Vector4D& v) const
 {
-    float _m[4] = {
-        0.f, 0.f, 0.f, 0.f
-    };
-
-    for (int i = 0; i < 4; ++i)
-    {
-        for (int j = 0; j < 4; ++j)
-        {
-            _m[i] += m[i * 4 + j] * vec[j];
-        }
-    }
-    return Vector4D(_m[0], _m[1], _m[2], _m[3]);
+    return Vector4D(
+        m[0] * v.x + m[4] * v.y + m[8] * v.z + m[12] * v.w,
+        m[1] * v.x + m[5] * v.y + m[9] * v.z + m[13] * v.w,
+        m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14] * v.w,
+        m[3] * v.x + m[7] * v.y + m[11] * v.z + m[15] * v.w
+    );
 }
 
 float Matrix4x4::Determinant() const
@@ -1608,96 +1476,68 @@ MatrixND Matrix4x4::ExpandRight(const MatrixND& mat) const
     return MatrixND(4, 4 + mat.columns, _m);
 }
 
-Matrix4x4 Matrix4x4::Pivot() const
-{
-    float _m[16] = {
-        m[0],  m[1],  m[2],  m[3],
-        m[4],  m[5],  m[6],  m[7],
-        m[8],  m[9],  m[10], m[11],
-        m[12], m[13], m[14], m[15]
-    };
-
-    int r = -1;
-    for (int j = 0; j < 4; ++j)
-    {
-        int k = j;
-
-        for (int i = j; i < 4; ++i)
-            if (std::abs(_m[i * 4 + j]) > std::abs(_m[k * 4 + j]))
-                k = i;
-
-        if (IsEqualZero(_m[k * 4 + j]))
-            continue;
-
-        ++r;
-
-        if (k != r)
-            for (int i = 0; i < 4; ++i)
-                std::swap(_m[r * 4 + i], _m[k * 4 + i]);
-
-        float pivot = _m[r * 4 + j];
-        if (!IsEqualZero(pivot))
-            for (int i = 0; i < 4; ++i)
-                _m[r * 4 + i] /= pivot;
-
-        for (int i = 0; i < 4; ++i)
-        {
-            if (i != r)
-            {
-                float factor = _m[i * 4 + j];
-                for (int l = 0; l < 4; ++l)
-                    _m[i * 4 + l] -= factor * _m[r * 4 + l];
-            }
-        }
-    }
-
-    return Matrix4x4(_m);
-}
-
 Matrix4x4 Matrix4x4::Inverse() const
 {
-    if (IsEqualZero(Determinant()))
-        return *this;
+    float det = Determinant();
+    if (IsEqualZero(det)) return Matrix4x4::Zero;
 
-    MatrixND mat(4, 8, ExpandRight(Identity).m);
-    mat = mat.Pivot();
+    float invDet = 1.0f / det;
 
+    float res[16]{};
+
+    res[0] = (m[5] * (m[10] * m[15] - m[11] * m[14]) - m[6] * (m[9] * m[15] - m[11] * m[13]) + m[7] * (m[9] * m[14] - m[10] * m[13])) * invDet;
+    res[1] = -(m[1] * (m[10] * m[15] - m[11] * m[14]) - m[2] * (m[9] * m[15] - m[11] * m[13]) + m[3] * (m[9] * m[14] - m[10] * m[13])) * invDet;
+    res[2] = (m[1] * (m[6] * m[15] - m[7] * m[14]) - m[2] * (m[5] * m[15] - m[7] * m[13]) + m[3] * (m[5] * m[14] - m[6] * m[13])) * invDet;
+    res[3] = -(m[1] * (m[6] * m[11] - m[7] * m[10]) - m[2] * (m[5] * m[11] - m[7] * m[9]) + m[3] * (m[5] * m[10] - m[6] * m[9])) * invDet;
+
+    res[4] = -(m[4] * (m[10] * m[15] - m[11] * m[14]) - m[6] * (m[8] * m[15] - m[11] * m[12]) + m[7] * (m[8] * m[14] - m[10] * m[12])) * invDet;
+    res[5] = (m[0] * (m[10] * m[15] - m[11] * m[14]) - m[2] * (m[8] * m[15] - m[11] * m[12]) + m[3] * (m[8] * m[14] - m[10] * m[12])) * invDet;
+    res[6] = -(m[0] * (m[6] * m[15] - m[7] * m[14]) - m[2] * (m[4] * m[15] - m[7] * m[12]) + m[3] * (m[4] * m[14] - m[6] * m[12])) * invDet;
+    res[7] = (m[0] * (m[6] * m[11] - m[7] * m[10]) - m[2] * (m[4] * m[11] - m[7] * m[8]) + m[3] * (m[4] * m[10] - m[6] * m[8])) * invDet;
+
+    res[8] = (m[4] * (m[9] * m[15] - m[11] * m[13]) - m[5] * (m[8] * m[15] - m[11] * m[12]) + m[7] * (m[8] * m[13] - m[9] * m[12])) * invDet;
+    res[9] = -(m[0] * (m[9] * m[15] - m[11] * m[13]) - m[1] * (m[8] * m[15] - m[11] * m[12]) + m[3] * (m[8] * m[13] - m[9] * m[12])) * invDet;
+    res[10] = (m[0] * (m[5] * m[15] - m[7] * m[13]) - m[1] * (m[4] * m[15] - m[7] * m[12]) + m[3] * (m[4] * m[13] - m[5] * m[12])) * invDet;
+    res[11] = -(m[0] * (m[5] * m[11] - m[7] * m[9]) - m[1] * (m[4] * m[11] - m[7] * m[8]) + m[3] * (m[4] * m[9] - m[5] * m[8])) * invDet;
+
+    res[12] = -(m[4] * (m[9] * m[14] - m[10] * m[13]) - m[5] * (m[8] * m[14] - m[10] * m[12]) + m[6] * (m[8] * m[13] - m[9] * m[12])) * invDet;
+    res[13] = (m[0] * (m[9] * m[14] - m[10] * m[13]) - m[1] * (m[8] * m[14] - m[10] * m[12]) + m[2] * (m[8] * m[13] - m[9] * m[12])) * invDet;
+    res[14] = -(m[0] * (m[5] * m[14] - m[6] * m[13]) - m[1] * (m[4] * m[14] - m[6] * m[12]) + m[2] * (m[4] * m[13] - m[5] * m[12])) * invDet;
+    res[15] = (m[0] * (m[5] * m[10] - m[6] * m[9]) - m[1] * (m[4] * m[10] - m[6] * m[8]) + m[2] * (m[4] * m[9] - m[5] * m[8])) * invDet;
+
+    return Matrix4x4(res);
+}
+
+Matrix4x4 Matrix4x4::TranslateMatrix(Vector3D p)
+{
     return {
-        mat.m[4],  mat.m[5],  mat.m[6],  mat.m[7],
-        mat.m[12], mat.m[13], mat.m[14], mat.m[15],
-        mat.m[20], mat.m[21], mat.m[22], mat.m[23],
-        mat.m[28], mat.m[29], mat.m[30], mat.m[31]
+        1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        p.x, p.y, p.z, 1.f
     };
 }
 
-Matrix4x4 Matrix4x4::Translate(Vector3D p) const
+Matrix4x4 Matrix4x4::TRS(const Vector3D& t, const Vector3D& rotDeg, const Vector3D& s)
 {
+    Matrix3x3 r = Matrix3x3::RotationMatrixEuler(rotDeg);
+
     return {
-        1.f, 0.f, 0.f, p.x,
-        0.f, 1.f, 0.f, p.y,
-        0.f, 0.f, 1.f, p.z,
-        0.f, 0.f, 0.f, 1.f
+        r[0] * s.x, r[1] * s.x, r[2] * s.x, 0.f,
+        r[3] * s.y, r[4] * s.y, r[5] * s.y, 0.f,
+        r[6] * s.z, r[7] * s.z, r[8] * s.z, 0.f,
+        t.x, t.y, t.z, 1.0f
     };
-}
-
-Matrix4x4 Matrix4x4::TRS(const Vector3D& translate, const Vector3D& rotation, const Vector3D& scale)
-{
-    Matrix3x3 r = Matrix3x3::CreateRotation3DMatrix(rotation);
-
-    return Matrix4x4(
-        scale.x * r.m[0], scale.y * r.m[1], scale.z * r.m[2], translate.x,
-        scale.x * r.m[3], scale.y * r.m[4], scale.z * r.m[5], translate.y,
-        scale.x * r.m[6], scale.y * r.m[7], scale.z * r.m[8], translate.z,
-        0.f, 0.f, 0.f, 1.f
-    ).Transposite();
 }
 
 Matrix4x4 Matrix4x4::Perspective(float FOV, float aspect, float zNear, float zFar)
 {
-    Matrix4x4 result;
-
 	const float tanHalfFov = tan(FOV / 2.f);
 
+    if (IsEqualZero(tanHalfFov) || IsEqualZero(zFar - zNear))
+        return Matrix4x4::Identity;
+
+    Matrix4x4 result;
 	result.m[0] = 1.f / (aspect * tanHalfFov);
 	result.m[5] = 1.f / (tanHalfFov);
 	result.m[10] = -(zFar + zNear) / (zFar - zNear);
@@ -1709,6 +1549,9 @@ Matrix4x4 Matrix4x4::Perspective(float FOV, float aspect, float zNear, float zFa
 
 Matrix4x4 Matrix4x4::Orthographic(float left, float right, float bottom, float top, float zNear, float zFar)
 {
+    if (IsEqualZero(right - left) || IsEqualZero(zFar - zNear) || IsEqualZero(top - bottom))
+        return Matrix4x4::Identity;
+
     Matrix4x4 result = Matrix4x4::Identity;
     result.m[0] = 2.f / (right - left);
     result.m[5] = 2.f / (top - bottom);
@@ -1735,70 +1578,84 @@ Matrix4x4 Matrix4x4::LookAt(Vector3D position, Vector3D target, Vector3D up)
     return result;
 }
 
-Matrix4x4 Matrix4x4::CreateTranslationMatrix(const Vector3D& translation)
-{
-    Matrix4x4 mat = Matrix4x4::Identity;
-
-    mat.m[3] = -translation.x;
-    mat.m[7] = -translation.y;
-    mat.m[11] = -translation.z;
-
-    return mat.Transposite();
-}
-
-Matrix4x4 Matrix4x4::CreateScaleMatrix(const Vector3D& scale)
+Matrix4x4 Matrix4x4::ScaleMatrix(const Vector3D& scale)
 {
     Matrix4x4 mat = Matrix4x4::Identity;
     mat.m[0] = scale.x;
     mat.m[5] = scale.y;
     mat.m[10] = scale.z;
     mat.m[15] = 1.f;
-    return mat.Transposite();
 
+    return mat;
 }
 
-Matrix4x4 Matrix4x4::CreateXRotationMatrix(float angle)
+Matrix4x4 Matrix4x4::ScaleMatrix(float x, float y, float z)
 {
-    angle *= PI / 180.f;
+    Matrix4x4 mat = Matrix4x4::Identity;
+    mat.m[0] = x;
+    mat.m[5] = y;
+    mat.m[10] = z;
+    mat.m[15] = 1.f;
+
+    return mat;
+}
+
+Matrix4x4 Matrix4x4::RotationXMatrix(float angle)
+{
+    angle = TO_RADIANS(angle);
+
+    float c = cos(angle);
+    float s = sin(angle);
 
     Matrix4x4 mat = Matrix4x4::Identity;
-    mat.m[5] = cos(angle);
-    mat.m[6] = -sin(angle);
-    mat.m[9] = sin(angle);
-    mat.m[10] = cos(angle);
-    return mat.Transposite();
+    mat.m[5] = c;
+    mat.m[6] = s;
+    mat.m[9] = -s;
+    mat.m[10] = c;
 
+    return mat;
 }
 
-Matrix4x4 Matrix4x4::CreateYRotationMatrix(float angle)
+Matrix4x4 Matrix4x4::RotationYMatrix(float angle)
 {
-    angle *= PI / 180.f;
+    angle = TO_RADIANS(angle);
+
+    float c = cos(angle);
+    float s = sin(angle);
 
     Matrix4x4 mat = Matrix4x4::Identity;
-    mat.m[0] = cos(angle);
-    mat.m[2] = sin(angle);
-    mat.m[8] = -sin(angle);
-    mat.m[10] = cos(angle);
-    return mat.Transposite();
+    mat.m[0] = c;
+    mat.m[2] = -s;
+    mat.m[8] = s;
+    mat.m[10] = c;
 
+    return mat;
 }
 
-Matrix4x4 Matrix4x4::CreateZRotationMatrix(float angle)
+Matrix4x4 Matrix4x4::RotationZMatrix(float angle)
 {
-    angle *= PI / 180.f;
+    angle = TO_RADIANS(angle);
+
+    float c = cos(angle);
+    float s = sin(angle);
 
     Matrix4x4 mat = Matrix4x4::Identity;
-    mat.m[0] = cos(angle);
-    mat.m[1] = -sin(angle);
-    mat.m[4] = sin(angle);
-    mat.m[5] = cos(angle);
-    return mat.Transposite();
+    mat.m[0] = c;
+    mat.m[1] = s;
+    mat.m[4] = -s;
+    mat.m[5] = c;
 
+    return mat;
 }
 
-Matrix4x4 Core::Maths::Matrix4x4::CreateRotationMatrix(const Vector3D& rotation)
+Matrix4x4 Matrix4x4::RotationMatrixEuler(const Vector3D& rotation)
 {
-    return CreateZRotationMatrix(rotation.z) * CreateZRotationMatrix(rotation.y) * CreateZRotationMatrix(rotation.x);
+    return RotationXMatrix(rotation.z) * RotationYMatrix(rotation.y) * RotationZMatrix(rotation.x);
+}
+
+Matrix4x4 Matrix4x4::RotationMatrixEuler(float x, float y, float z)
+{
+    return RotationXMatrix(x) * RotationYMatrix(y) * RotationZMatrix(z);
 }
 
 void Matrix4x4::Print() const
@@ -1869,9 +1726,9 @@ void Matrix4x4::operator+=(const MatrixND& mP)
 void Matrix4x4::operator+=(float x)
 {
     m[0] += x;  m[1] += x, m[2] += x, m[3] += x,
-        m[4] += x, m[5] += x, m[6] += x, m[7] += x,
-        m[8] += x, m[9] += x, m[10] += x, m[11] += x,
-        m[12] += x, m[13] += x, m[14] += x, m[15] += x;
+    m[4] += x, m[5] += x, m[6] += x, m[7] += x,
+    m[8] += x, m[9] += x, m[10] += x, m[11] += x,
+    m[12] += x, m[13] += x, m[14] += x, m[15] += x;
 }
 
 Matrix4x4 Matrix4x4::operator-(const Matrix4x4& mP)
@@ -1929,9 +1786,9 @@ void Matrix4x4::operator-=(const MatrixND& mP)
 void Matrix4x4::operator-=(float x)
 {
     m[0] -= x;  m[1] -= x, m[2] -= x, m[3] -= x,
-        m[4] -= x, m[5] -= x, m[6] -= x, m[7] -= x,
-        m[8] -= x, m[9] -= x, m[10] -= x, m[11] - x,
-        m[12] -= x, m[13] - x, m[14] - x, m[15] - x;
+    m[4] -= x, m[5] -= x, m[6] -= x, m[7] -= x,
+    m[8] -= x, m[9] -= x, m[10] -= x, m[11] - x,
+    m[12] -= x, m[13] - x, m[14] - x, m[15] - x;
 }
 
 Matrix4x4 Matrix4x4::operator*(const Matrix4x4& mP) 
@@ -1970,9 +1827,9 @@ void Matrix4x4::operator*=(const Matrix4x4& mP)
 void Matrix4x4::operator*=(float x)
 {
     m[0] *= x;  m[1] *= x, m[2] *= x, m[3] *= x,
-        m[4] *= x, m[5] *= x, m[6] *= x, m[7] *= x,
-        m[8] *= x, m[9] *= x, m[10] *= x, m[11] *= x,
-        m[12] *= x, m[13] *= x, m[14] *= x, m[15] *= x;
+    m[4] *= x,  m[5] *= x, m[6] *= x, m[7] *= x,
+    m[8] *= x,  m[9] *= x, m[10] *= x, m[11] *= x,
+    m[12] *= x, m[13] *= x, m[14] *= x, m[15] *= x;
 }
 
 Matrix4x4 Matrix4x4::operator/(float x)
@@ -1988,18 +1845,9 @@ Matrix4x4 Matrix4x4::operator/(float x)
 
 Matrix4x4 Matrix4x4::operator/(const Matrix4x4& mP)
 {
-    if (IsEqualZero(mP.m[0]) || IsEqualZero(mP.m[1]) || IsEqualZero(mP.m[2]) || IsEqualZero(mP.m[3]) ||
-        IsEqualZero(mP.m[4]) || IsEqualZero(mP.m[5]) || IsEqualZero(mP.m[6]) || IsEqualZero(mP.m[7]) ||
-        IsEqualZero(mP.m[8]) || IsEqualZero(mP.m[9]) || IsEqualZero(mP.m[10]) || IsEqualZero(mP.m[11]) ||
-        IsEqualZero(mP.m[12]) || IsEqualZero(mP.m[13]) || IsEqualZero(mP.m[14]) || IsEqualZero(mP.m[15]))
-        return Matrix4x4::Zero;
-
-    return {
-        m[0] / mP.m[0], m[1] / mP.m[1], m[2] / mP.m[2], m[3] / mP.m[3],
-        m[4] / mP.m[4], m[5] / mP.m[5], m[6] / mP.m[6], m[7] / mP.m[7],
-        m[8] / mP.m[8], m[9] / mP.m[9], m[10] / mP.m[10], m[11] / mP.m[11],
-        m[12] / mP.m[12], m[13] / mP.m[13], m[14] / mP.m[14], m[15] / mP.m[15]
-    };
+    Matrix4x4 result = *this * mP.Inverse();
+    result.RoundMatrix();
+    return result;
 }
 
 void Matrix4x4::operator/=(float x)
@@ -2008,52 +1856,41 @@ void Matrix4x4::operator/=(float x)
         return;
 
     m[0] /= x;  m[1] /= x, m[2] /= x, m[3] /= x,
-        m[4] /= x, m[5] /= x, m[6] /= x, m[7] /= x,
-        m[8] /= x, m[9] /= x, m[10] /= x, m[11] / x,
-        m[12] /= x, m[13] / x, m[14] / x, m[15] / x;
+    m[4] /= x, m[5] /= x, m[6] /= x, m[7] /= x,
+    m[8] /= x, m[9] /= x, m[10] /= x, m[11] / x,
+    m[12] /= x, m[13] / x, m[14] / x, m[15] / x;
 }
 
 void Matrix4x4::operator/=(const Matrix4x4& mP)
 {
-    if (IsEqualZero(mP.m[0]) || IsEqualZero(mP.m[1]) || IsEqualZero(mP.m[2]) || IsEqualZero(mP.m[3]) ||
-        IsEqualZero(mP.m[4]) || IsEqualZero(mP.m[5]) || IsEqualZero(mP.m[6]) || IsEqualZero(mP.m[7]) ||
-        IsEqualZero(mP.m[8]) || IsEqualZero(mP.m[9]) || IsEqualZero(mP.m[10]) || IsEqualZero(mP.m[11]) ||
-        IsEqualZero(mP.m[12]) || IsEqualZero(mP.m[13]) || IsEqualZero(mP.m[14]) || IsEqualZero(mP.m[15]))
-        return;
+    *this = *this * mP.Inverse();
+}
 
-    m[0] /= mP.m[0];   m[1] /= mP.m[1];   m[2] /= mP.m[2];   m[3] /= mP.m[3];
-    m[4] /= mP.m[4];   m[5] /= mP.m[5];   m[6] /= mP.m[6];   m[7] /= mP.m[7];
-    m[8] /= mP.m[8];   m[9] /= mP.m[9];   m[10] /= mP.m[10]; m[11] /= mP.m[11];
-    m[12] /= mP.m[12]; m[13] /= mP.m[13]; m[14] /= mP.m[14]; m[15] /= mP.m[15];
+Matrix4x4 Matrix4x4::operator-()
+{
+    return Opposite();
 }
 
 void Matrix4x4::RoundMatrix()
 {
-    if (NearZero(m[0]))  m[0] = 0.f;
-    if (NearZero(m[1]))  m[1] = 0.f;
-    if (NearZero(m[2]))  m[2] = 0.f;
-    if (NearZero(m[3]))  m[3] = 0.f;
-    if (NearZero(m[4]))  m[4] = 0.f;
-    if (NearZero(m[5]))  m[5] = 0.f;
-    if (NearZero(m[6]))  m[6] = 0.f;
-    if (NearZero(m[7]))  m[7] = 0.f;
-    if (NearZero(m[8]))  m[8] = 0.f;
-    if (NearZero(m[9]))  m[9] = 0.f;
-    if (NearZero(m[10])) m[10] = 0.f;
-    if (NearZero(m[11])) m[11] = 0.f;
-    if (NearZero(m[12])) m[12] = 0.f;
-    if (NearZero(m[13])) m[13] = 0.f;
-    if (NearZero(m[14])) m[14] = 0.f;
-    if (NearZero(m[15])) m[15] = 0.f;
+    if (IsEqualZero(m[0]))  m[0] = 0.f;
+    if (IsEqualZero(m[1]))  m[1] = 0.f;
+    if (IsEqualZero(m[2]))  m[2] = 0.f;
+    if (IsEqualZero(m[3]))  m[3] = 0.f;
+    if (IsEqualZero(m[4]))  m[4] = 0.f;
+    if (IsEqualZero(m[5]))  m[5] = 0.f;
+    if (IsEqualZero(m[6]))  m[6] = 0.f;
+    if (IsEqualZero(m[7]))  m[7] = 0.f;
+    if (IsEqualZero(m[8]))  m[8] = 0.f;
+    if (IsEqualZero(m[9]))  m[9] = 0.f;
+    if (IsEqualZero(m[10])) m[10] = 0.f;
+    if (IsEqualZero(m[11])) m[11] = 0.f;
+    if (IsEqualZero(m[12])) m[12] = 0.f;
+    if (IsEqualZero(m[13])) m[13] = 0.f;
+    if (IsEqualZero(m[14])) m[14] = 0.f;
+    if (IsEqualZero(m[15])) m[15] = 0.f;
 }
 
-bool Matrix4x4::NearZero(float num) const
-{
-    if (std::fabs(num) < 0.00001f)
-        return true;
-    else
-        return false;
-}
 #pragma endregion
 
 #pragma region MatrixND
@@ -2287,17 +2124,10 @@ void MatrixND::Print() const
 void MatrixND::RoundMatrix()
 {
     for (int i = 0; i < size; ++i)
-        if (NearZero(m[i]))
+        if (IsEqualZero(m[i]))
             m[i] = 0.f;
 }
 
-bool MatrixND::NearZero(float num) const
-{
-    if (std::fabs(num) < 0.00001f)
-        return true;
-    else
-        return false;
-}
 
 MatrixND MatrixND::MultiplyScalar(float f) const
 {
