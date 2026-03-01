@@ -7,13 +7,30 @@ Vector2D v2_2(5.0f, 6.0f);
 glm::vec2 g_2(3.0f, 4.0f);
 glm::vec2 g2_2(5.0f, 6.0f);
 
+Vector3D v_3(1.0f, 2.0f, 3.0f);
+Vector3D v2_3(4.0f, 5.0f, 6.0f);
+
+glm::vec3 g_3(1.0f, 2.0f, 3.0f);
+glm::vec3 g2_3(4.0f, 5.0f, 6.0f);
+
+Vector3D pivotV_3(1.0f, 1.0f, 1.0f);
+glm::vec3 pivotG_3(1.0f, 1.0f, 1.0f);
+
+Vector4D v_4(1.0f, 2.0f, 3.0f, 4.0f);
+Vector4D v2_4(5.0f, 6.0f, 7.0f, 8.0f);
+
+glm::vec4 g_4(1.0f, 2.0f, 3.0f, 4.0f);
+glm::vec4 g2_4(5.0f, 6.0f, 7.0f, 8.0f);
+
 float maxMagnitude = 1.0f;
 float angle = 90.0f;
 float scale = 5.0f;
-float f = 2.5f;
+float scalar = 2.5f;
 
 Vector2D pivotV_2(1.0f, 1.0f);
 glm::vec2 pivotG_2(1.0f, 1.0f);
+
+#pragma region Vector2DTests
 
 TEST(Vector2DTest, Magnitude) 
 {
@@ -93,19 +110,19 @@ TEST(Vector2DTest, Utils)
 TEST(Vector2DTest, Operators) 
 {
     EXPECT_VEC2_EQ(v_2 + v2_2, g_2 + g2_2);
-    EXPECT_VEC2_EQ(v_2 + f, g_2 + f);
+    EXPECT_VEC2_EQ(v_2 + scalar, g_2 + scalar);
 
     EXPECT_VEC2_EQ(v_2 - v2_2, g_2 - g2_2);
-    EXPECT_VEC2_EQ(v_2 - f, g_2 - f);
+    EXPECT_VEC2_EQ(v_2 - scalar, g_2 - scalar);
 
     EXPECT_VEC2_EQ(v_2 * v2_2, g_2 * g2_2);
-    EXPECT_VEC2_EQ(v_2 * f, g_2 * f);
+    EXPECT_VEC2_EQ(v_2 * scalar, g_2 * scalar);
 
     EXPECT_VEC2_EQ(v_2 / v2_2, g_2 / g2_2);
-    EXPECT_VEC2_EQ(v_2 / f, g_2 / f);
+    EXPECT_VEC2_EQ(v_2 / scalar, g_2 / scalar);
 
-    EXPECT_VEC2_EQ(v_2 * f, g_2 * f);
-    EXPECT_VEC2_EQ(f * v_2, f * g_2);
+    EXPECT_VEC2_EQ(v_2 * scalar, g_2 * scalar);
+    EXPECT_VEC2_EQ(scalar * v_2, scalar * g_2);
 
     EXPECT_VEC2_EQ(-v_2, -g_2);
 
@@ -122,14 +139,9 @@ TEST(Vector2DTest, Constants)
     EXPECT_VEC2_EQ(Vector2D::Right, glm::vec2(1, 0));
 }
 
-Vector3D v_3(1.0f, 2.0f, 3.0f);
-Vector3D v2_3(4.0f, 5.0f, 6.0f);
+#pragma endregion
 
-glm::vec3 g_3(1.0f, 2.0f, 3.0f);
-glm::vec3 g2_3(4.0f, 5.0f, 6.0f);
-
-Vector3D pivotV_3(1.0f, 1.0f, 1.0f);
-glm::vec3 pivotG_3(1.0f, 1.0f, 1.0f);
+#pragma region Vector3DTests
 
 TEST(Vector3DTest, Magnitude)
 {
@@ -203,9 +215,9 @@ TEST(Vector3DTest, Operators)
     EXPECT_VEC3_EQ(v_3 * v2_3, g_3 * g2_3);
     EXPECT_VEC3_EQ(v_3 / v2_3, g_3 / g2_3);
 
-    EXPECT_VEC3_EQ(v_3 * f, g_3 * f);
-    EXPECT_VEC3_EQ(f * v_3, f * g_3);
-    EXPECT_VEC3_EQ(v_3 / f, g_3 / f);
+    EXPECT_VEC3_EQ(v_3 * scalar, g_3 * scalar);
+    EXPECT_VEC3_EQ(scalar * v_3, scalar * g_3);
+    EXPECT_VEC3_EQ(v_3 / scalar, g_3 / scalar);
 
     EXPECT_TRUE(v_3 == Vector3D(1.0f, 2.0f, 3.0f));
     EXPECT_FLOAT_EQ(v_3[2], g_3[2]);
@@ -222,11 +234,9 @@ TEST(Vector3DTest, Constants)
     EXPECT_VEC3_EQ(Vector3D::Right, glm::vec3(1, 0, 0));
 }
 
-Vector4D v_4(1.0f, 2.0f, 3.0f, 4.0f);
-Vector4D v2_4(5.0f, 6.0f, 7.0f, 8.0f);
+#pragma endregion
 
-glm::vec4 g_4(1.0f, 2.0f, 3.0f, 4.0f);
-glm::vec4 g2_4(5.0f, 6.0f, 7.0f, 8.0f);
+#pragma region Vector4DTests
 
 TEST(Vector4DTest, Magnitude)
 {
@@ -287,11 +297,11 @@ TEST(Vector4DTest, Operators)
     EXPECT_VEC4_EQ(v_4 * v2_4, g_4 * g2_4);
     EXPECT_VEC4_EQ(v_4 / v2_4, g_4 / g2_4);
 
-    EXPECT_VEC4_EQ(v_4 + f, g_4 + f);
-    EXPECT_VEC4_EQ(v_4 - f, g_4 - f);
-    EXPECT_VEC4_EQ(v_4 * f, g_4 * f);
-    EXPECT_VEC4_EQ(f * v_4, f * g_4);
-    EXPECT_VEC4_EQ(v_4 / f, g_4 / f);
+    EXPECT_VEC4_EQ(v_4 + scalar, g_4 + scalar);
+    EXPECT_VEC4_EQ(v_4 - scalar, g_4 - scalar);
+    EXPECT_VEC4_EQ(v_4 * scalar, g_4 * scalar);
+    EXPECT_VEC4_EQ(scalar * v_4, scalar * g_4);
+    EXPECT_VEC4_EQ(v_4 / scalar, g_4 / scalar);
 
     EXPECT_VEC4_EQ(-v_4, -g_4);
 
@@ -306,3 +316,5 @@ TEST(Vector4DTest, Constants)
     EXPECT_VEC4_EQ(Vector4D::Zero, glm::vec4(0, 0, 0, 0));
     EXPECT_VEC4_EQ(Vector4D::One, glm::vec4(1, 1, 1, 1));
 }
+
+#pragma endregion
