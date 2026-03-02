@@ -125,17 +125,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="toolbox\src\matrix.cpp" />
-    <ClCompile Include="toolbox\src\quaternion.cpp" />
-    <ClCompile Include="toolbox\src\utility.cpp" />
-    <ClCompile Include="toolbox\src\vector.cpp" />
+    <ClCompile Include="source\matrix.cpp" />
+    <ClCompile Include="source\quaternion.cpp" />
+    <ClCompile Include="source\utility.cpp" />
+    <ClCompile Include="source\vector.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="toolbox\include\matrix.h" />
-    <ClInclude Include="toolbox\include\quaternion.h" />
-    <ClInclude Include="toolbox\include\utility.h" />
-    <ClInclude Include="toolbox\include\vector.h" />
+    <ClInclude Include="include\matrix.h" />
+    <ClInclude Include="include\quaternion.h" />
+    <ClInclude Include="include\utility.h" />
+    <ClInclude Include="include\vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

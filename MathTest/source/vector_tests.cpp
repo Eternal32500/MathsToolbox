@@ -1,4 +1,4 @@
-#include "equal_utils.h"
+#include "../include/equal_utils.h"
 #include <glm/gtx/vector_angle.hpp>
 
 Vector2D v_2(3.0f, 4.0f);

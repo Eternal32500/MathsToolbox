@@ -1,4 +1,4 @@
-#include "equal_utils.h"
+#include "../include/equal_utils.h"
 
 Matrix2x2 m2 = Matrix2x2(2.f, 3.f, 4.f, 5.f);
 Matrix2x2 m2_2 = Matrix2x2(6.f, 7.f, 8.f, 9.f);

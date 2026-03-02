@@ -1,4 +1,4 @@
-#include "equal_utils.h"
+#include "../include/equal_utils.h"
 
 Quaternion q(1.0f, 2.0f, 3.0f, 4.0f);
 Quaternion q2(0.5f, -1.0f, 2.0f, -0.5f);

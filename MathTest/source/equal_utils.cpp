@@ -1,4 +1,4 @@
-#include "equal_utils.h"
+#include "../include/equal_utils.h"
 #include "utility.h"
 
 void EXPECT_VEC2_EQ(const Vector2D& myVec, const glm::vec2& glmVec)
